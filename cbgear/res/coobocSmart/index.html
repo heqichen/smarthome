@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="cn">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cooboc Smart Setup</title>
+    <meta name="description" content="Cooboc Smart Device Setup">
+    <meta name="author" content="HE Qichen">
+    <style>
+        * {
+            margin: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Cooboc Smart Device Setup</h1>
+    ID: <b>CoobocSmart_DFASSA</b><br />
+    <form action="/set.html" method="GET" id="form">
+        <label for="s">SSID: </label><input name="s" type="text" /><br />
+        <label for="p">Password: </label> <input name="p" type="text" /><br />
+        <input id="p" type="submit" value="Submit" />
+    </form>
+    <script lang="text/javascript">
+        var s = ["None", "1-Button", "2-Button", "3-Button", "4-Button", "Slot", "Human Existence Sensor", "PIR Sensor", "Water Sensor", "Door Sensor"];
+        var n;
+        d = document
+        f = (e, k, v) => { e.setAttribute(k, v) }
+        g = (o) => { return d.createElement(o) }
+        p = d.getElementById("p")
+        h = (o) => { p.parentNode.insertBefore(o, p) }
+        for (var i = 0; i < s.length; ++i) {
+            n = g("input");
+            f(n, "type", "radio");
+            f(n, "id", i);
+            f(n, "name", "type");
+            f(n, "value", i);
+            h(n);
+            n = g("label");
+            f(n, "for", i);
+            n.innerText = s[i];
+            h(n);
+            h(g("br"));
+        }
+    </script>
+</body>
+
+</html>
