@@ -10,6 +10,7 @@ Mode g_mode;
 uint32_t g_chipId;
 uint8_t g_mac[6];
 char g_wifiName[20];
+char g_hostname[12];
 char g_idStr[8];
 
 
@@ -49,7 +50,12 @@ bool readEepromConfig() {
     Serial.println(readoutCrc);
   }
 
-  return expectCrc == readoutCrc;
+  // TODO: check essid > 0 ? and type != 0 ?
+  if (expectCrc == readoutCrc) {
+    return g_config.type != 0;
+  }
+  return false;
+  
 }
 
 void writeEepromConfig() {
@@ -61,8 +67,7 @@ void writeEepromConfig() {
     EEPROM.write(i, baseAddr[i]);
   }
   EEPROM.commit();
-  Serial.println("write done. restart");
-  ESP.restart();
+  
 }
 
 void readMacAddress() {
@@ -90,13 +95,20 @@ void makeName() {
   g_wifiName[9] = 'r';
   g_wifiName[10] = 't';
   g_wifiName[11] = '_';
+
+  g_hostname[0] = 'C';
+  g_hostname[1] = 'S';
+  g_hostname[2] = 'G';
+  g_hostname[3] = '-';
   uint32_t chipId = g_chipId;
   for (int i = 0; i < 7; ++i) {
     g_idStr[i] = CHARMAP[chipId % 36];
     g_wifiName[12 + i] = g_idStr[i];
+    g_hostname[4+i] = g_idStr[i];
     chipId /= 36;
   }
   g_wifiName[19] = '\0';
+  g_hostname[11] = '\0';
   Serial.print("name: ");
   Serial.println(g_wifiName);
 }
@@ -109,4 +121,6 @@ void hardwareSetup() {
   g_mode = readEepromConfig() ? Mode::STA : Mode::AP;
   readMacAddress();
   makeName();
+
+  
 }

@@ -3,9 +3,9 @@
 
 
 class Sta {
+public:
   void setup();
   void loop();
 };
 
 #endif
-

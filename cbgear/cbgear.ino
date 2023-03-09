@@ -1,12 +1,13 @@
 
 #include "portal.h"
 #include "config.h"
-
+#include "sta.h"
 
 
 
 
 Portal portal;
+Sta sta;
 
 
 void setup() {
@@ -14,9 +15,10 @@ void setup() {
 
   // Hardwrare initialize
   hardwareSetup();
-    if (g_mode == Mode::AP) {
+  if (g_mode == Mode::AP) {
     portal.setup();
   } else {
+    sta.setup();
   }
 }
 
@@ -27,5 +29,6 @@ void loop() {
   if (g_mode == Mode::AP) {
     portal.loop();
   } else {
+    sta.loop();
   }
 }

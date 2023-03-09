@@ -24,6 +24,7 @@ extern Config g_config;
 extern Mode g_mode;
 extern uint32_t g_chipId;
 extern char g_wifiName[20];
+extern char g_hostname[12];
 extern char g_idStr[8];
 extern uint8_t g_mac[6];
 

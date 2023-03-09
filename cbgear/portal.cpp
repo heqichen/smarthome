@@ -6,10 +6,10 @@
 #include "config.h"
 #include "html_fregments.h"
 
-const byte DNS_PORT = 53;
-IPAddress apIP(172, 217, 28, 1);
-DNSServer dnsServer;
-ESP8266WebServer webServer(80);
+constexpr byte DNS_PORT = 53;
+static IPAddress apIP(172, 217, 28, 1);
+static DNSServer dnsServer;
+static ESP8266WebServer webServer(80);
 
 Portal::Portal() {
 }
@@ -63,6 +63,7 @@ void Portal::setup() {
     g_config.type = webServer.arg("t").toInt();
     
     writeEepromConfig();
+    ESP.restart();
   });
 
   // replay to all requests with same HTML
