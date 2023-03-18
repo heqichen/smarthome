@@ -15,7 +15,6 @@ char g_idStr[8];
 
 
 uint16_t calculateCrc(uint8_t* dataPtr, size_t len) {
-  int i = 0;
   uint16_t crc = 0;
   for (size_t i = 0U; i < len; ++i) {
     uint16_t data = *(dataPtr + i);
@@ -55,7 +54,6 @@ bool readEepromConfig() {
     return g_config.type != 0;
   }
   return false;
-  
 }
 
 void writeEepromConfig() {
@@ -67,7 +65,6 @@ void writeEepromConfig() {
     EEPROM.write(i, baseAddr[i]);
   }
   EEPROM.commit();
-  
 }
 
 void readMacAddress() {
@@ -104,7 +101,7 @@ void makeName() {
   for (int i = 0; i < 7; ++i) {
     g_idStr[i] = CHARMAP[chipId % 36];
     g_wifiName[12 + i] = g_idStr[i];
-    g_hostname[4+i] = g_idStr[i];
+    g_hostname[4 + i] = g_idStr[i];
     chipId /= 36;
   }
   g_wifiName[19] = '\0';
@@ -113,14 +110,51 @@ void makeName() {
   Serial.println(g_wifiName);
 }
 
+
+void defaultPinSetup() {
+  pinMode(2, INPUT);
+  pinMode(4, INPUT);
+  pinMode(5, INPUT);
+  pinMode(12, INPUT);
+  pinMode(13, INPUT);
+  pinMode(14, INPUT);
+  pinMode(15, INPUT);
+}
+
+void devicePinSetup() {
+  // ['None','1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor'];
+  Serial.print("config to gear type: ");
+  Serial.println(g_config.type);
+  switch (g_config.type) {
+    case (5):
+      {  // SLOT
+        // Relay
+        pinMode(4, OUTPUT);
+        digitalWrite(4, LOW);
+        // Key, push to ground
+        pinMode(12, INPUT_PULLUP);
+        // LED, high to light
+        pinMode(13, OUTPUT);
+        digitalWrite(13, LOW);
+        break;
+      }
+  }
+}
+
+
+
 void hardwareSetup() {
   Serial.begin(115200);
   EEPROM.begin(EEPROM_SIZE);
   Serial.println("\n");
 
-  g_mode = readEepromConfig() ? Mode::STA : Mode::AP;
+  bool isConfigured = readEepromConfig();
+  g_mode = isConfigured ? Mode::STA : Mode::AP;
   readMacAddress();
   makeName();
 
-  
+  defaultPinSetup();
+  if (isConfigured) {
+    devicePinSetup();
+  }
 }

@@ -22,6 +22,8 @@ void setup() {
   }
 }
 
+static int keyStatus = 0;
+
 void loop() {
   // put your main code here, to run repeatedly:
   // Serial.println(EEPROM_SIZE);
@@ -30,5 +32,12 @@ void loop() {
     portal.loop();
   } else {
     sta.loop();
+    int currentStatus = digitalRead(12);
+    if (keyStatus != currentStatus) {
+      keyStatus = currentStatus;
+      Serial.print("key changed ");
+      Serial.println(currentStatus);
+      digitalWrite(13, keyStatus);
+    }
   }
 }
