@@ -16,4 +16,7 @@ TODO:
 [ ] Release the button to send the status out
 [#] Make a programmer for socket
 [#] test to blink the LED on socket
-[ ] Gear can response auth packet
+[#] Gear can response auth packet
+
+
+
