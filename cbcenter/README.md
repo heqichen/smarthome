@@ -17,6 +17,7 @@ TODO:
 [#] Make a programmer for socket
 [#] test to blink the LED on socket
 [#] Gear can response auth packet
-
+[ ] refactor about packet builder and packet parser
+[ ] refactor GearTalk's callback map parameter, any, undefined or something
 
 

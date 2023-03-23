@@ -39,12 +39,15 @@ socket.connect(netOpt, () => {
         console.log("actual crc: ", actualCrc, "  expect crc: ", expectCrc);
 
         data[1] |= 0x01;
-
+        // data[2]++;
         data.writeUint8(3, 6);
-        data.write("12345678", 6, 7, "utf-8");
+        data.write("12345678", 7, 7, "utf-8");
         console.log(data);
         const crc: number = calculateCrc(data);
         data.writeUint16BE(crc, 14);
-        socket.write(data);
+        setTimeout(() => {
+            socket.write(data);
+        }, (1950));
+
     });
 });
