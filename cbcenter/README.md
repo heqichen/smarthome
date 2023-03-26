@@ -19,5 +19,12 @@ TODO:
 [#] Gear can response auth packet
 [ ] refactor about packet builder and packet parser
 [ ] refactor GearTalk's callback map parameter, any, undefined or something
+[ ] Request heartbeat to Gear
+[ ] handle heartbeat not response
+[ ] Mock Gear can return heartbeat
+
+-- For gear
+[X] Wite Socket config if config is not right
+[ ] config page add host config
 
 

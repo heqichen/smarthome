@@ -37,17 +37,37 @@ socket.connect(netOpt, () => {
         data[15] = 0;
         const expectCrc: number = calculateCrc(data);
         console.log("actual crc: ", actualCrc, "  expect crc: ", expectCrc);
+        const packetType: number = data.readUint16BE(4);
+        console.log("packet type: ", packetType);
 
-        data[1] |= 0x01;
-        // data[2]++;
-        data.writeUint8(3, 6);
-        data.write("12345678", 7, 7, "utf-8");
-        console.log(data);
-        const crc: number = calculateCrc(data);
-        data.writeUint16BE(crc, 14);
-        setTimeout(() => {
-            socket.write(data);
-        }, (1950));
+        switch (packetType) {
+            case (0x0203): { // auth
+                console.log("AUTH packet");
+                data[1] |= 0x01;
+                // data[2]++;
+                data.writeUint8(3, 6);
+                data.write("12345678", 7, 7, "utf-8");
+                console.log(data);
+                const crc: number = calculateCrc(data);
+                data.writeUint16BE(crc, 14);
+                setTimeout(() => {
+                    socket.write(data);
+                }, (1950));
+                break;
+            }
+            case (0x0631): {
+                console.log("heartbeat packet");
+                data[1] |= 0x01;
+                const crc: number = calculateCrc(data);
+                data.writeUint16BE(crc, 14);
+                // socket.write(data);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
 
     });
 });
