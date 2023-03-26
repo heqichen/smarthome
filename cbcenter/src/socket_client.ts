@@ -13,14 +13,33 @@ class SocketClient {
     private packetResolve_: (payload: Payload) => void = (payload: Payload) => { };
     private packetReject_: (reason: string) => void = () => { };
     private isClientAuthed_: boolean = false;
+    private clientDiedCallback_: (reason: string) => void = () => { };
 
     constructor(conn: net.Socket) {
+        this.onAuth = this.onAuth.bind(this);
+        this.onInvalidPacket = this.onInvalidPacket.bind(this);
+        this.onHeartbeat = this.onHeartbeat.bind(this);
+        this.onPacketTimeout = this.onPacketTimeout.bind(this);
+        this.acceptPacket = this.acceptPacket.bind(this);
+        this.rejectPacket = this.rejectPacket.bind(this);
+        this.requestPacket = this.requestPacket.bind(this);
+        this.authenticate = this.authenticate.bind(this);
+        this.heartbeat = this.heartbeat.bind(this);
+        this.drop = this.drop.bind(this);
+        this.onClientDied = this.onClientDied.bind(this);
+        this.setClientEndCallback = this.setClientEndCallback.bind(this);
+
         this.isRequesting_ = false;
         this.talk_ = new GearTalk(conn);
         this.talk_.on("auth", this.onAuth);
         this.talk_.on("invalidPacket", this.onInvalidPacket);
         this.talk_.on("packetTimeout", this.onPacketTimeout);
         this.talk_.on("heartbeat", this.onHeartbeat);
+        this.talk_.on("die", this.onClientDied);
+    }
+
+    setClientEndCallback: (callback: (reason: string) => void) => void = (callback: (reason: string) => void): void => {
+        this.clientDiedCallback_ = callback;
     }
 
     private onAuth: (payload: Payload) => void = (payload: Payload): void => {
@@ -45,6 +64,10 @@ class SocketClient {
 
     private onPacketTimeout: (reason: string) => void = (reason: string): void => {
         this.rejectPacket(reason);
+    }
+
+    private onClientDied: (reason: string) => void = (reason: string): void => {
+        this.clientDiedCallback_(reason);
     }
 
     private acceptPacket: (payload: Payload) => void = (payload: Payload): void => {

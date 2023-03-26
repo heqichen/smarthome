@@ -30,12 +30,17 @@ export default class ClientPool {
             console.error(signature.id, " already in the pool, close the coming one");
             socketClient.drop();
         }
-        console.log("add to pool");
+
         this.clientList_.set(signature.id, socketClient);
         this.clientStatusList_.set(signature.id, {
             id: signature.id,
             talkFailedNum: 0,
             isDirty: false
+        });
+        socketClient.setClientEndCallback((reason: string) => {
+            console.log("client end ", signature.id, reason);
+            socketClient.drop();
+            this.dirtyClient_.add(signature.id);
         });
     }
 

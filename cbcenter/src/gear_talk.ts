@@ -46,13 +46,13 @@ export default class GearTalk {
         conn.on("close", this.onSocketEndHandler);
         conn.on("end", this.onSocketEndHandler);
         conn.on("timeout", this.onSocketEndHandler);
+
     }
+
 
     private onSocketEndHandler(): void {
         this.isConnDied_ = true;
-        console.error(" TODO send msg to upper");
-
-        // TODO send msg to upper
+        this.callEvent("die", "connection end");
     }
 
     on(event: string, callback: (d: any | undefined) => void) {
