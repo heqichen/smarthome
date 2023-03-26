@@ -60,7 +60,7 @@ socket.connect(netOpt, () => {
                 data[1] |= 0x01;
                 const crc: number = calculateCrc(data);
                 data.writeUint16BE(crc, 14);
-                // socket.write(data);
+                socket.write(data);
                 break;
             }
             default: {

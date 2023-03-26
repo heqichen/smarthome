@@ -18,9 +18,9 @@ TODO:
 [#] test to blink the LED on socket
 [#] Gear can response auth packet
 [ ] refactor about packet builder and packet parser
-[ ] refactor GearTalk's callback map parameter, any, undefined or something
-[ ] Request heartbeat to Gear
-[ ] handle heartbeat not response
+[#] refactor GearTalk's callback map parameter, any, undefined or something
+[#] Request heartbeat to Gear
+[#] handle heartbeat not response
 [ ] Mock Gear can return heartbeat
 
 -- For gear
