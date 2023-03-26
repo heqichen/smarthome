@@ -8,7 +8,8 @@ constexpr uint64_t PACKET_TIMEOUT_THRESHOLD = 400U;
 
 constexpr uint32_t PACKET_LENGTH{ 16U };
 constexpr uint8_t PACKET_HEADER{ 0xA5 };
-constexpr uint16_t PACKET_TYPE_AUTH {0x0203};
+constexpr uint16_t PACKET_TYPE_AUTH{ 0x0203 };
+constexpr uint16_t PACKET_TYPE_HEARTBEAT{ 0x0631 };
 
 class PacketParser {
 public:
@@ -53,20 +54,40 @@ private:
     const uint8_t packetAttr = packetBuffer_[1];
     const uint16_t packetId = (packetBuffer_[2] << 8) | packetBuffer_[3];
     const uint16_t packetType = (packetBuffer_[4] << 8) | packetBuffer_[5];
-    if (packetType == PACKET_TYPE_AUTH) {
-      // response it immediately
-      packetBuffer_[1] = packetAttr | 0x01;
-      packetBuffer_[6] = g_config.type;
-      for (int i=0; i<7; ++i) {
-        packetBuffer_[7+i] = g_idStr[i];
-      }
-      packetBuffer_[14] = 0U;
-      packetBuffer_[15] = 0U;
+
+    switch (packetType) {
+      case (PACKET_TYPE_AUTH):
+        {
+          // response it immediately
+          packetBuffer_[1] = packetAttr | 0x01;
+          packetBuffer_[6] = g_config.type;
+          for (int i = 0; i < 7; ++i) {
+            packetBuffer_[7 + i] = g_idStr[i];
+          }
+          break;
+        }
+      case (PACKET_TYPE_HEARTBEAT):
+        {
+          // response it immediately
+          Serial.print("heart beat");
+          Serial.println(packetId);
+          packetBuffer_[1] = packetAttr | 0x01;
+          break;
+        }
+      default:
+        {
+          // Unknown packet
+          return;
+        }
     }
+    // Clear CRC bit
+    packetBuffer_[14] = 0U;
+    packetBuffer_[15] = 0U;
     const uint16_t crc = calculateCrc(packetBuffer_, PACKET_LENGTH);
     packetBuffer_[14] = (crc >> 8) & 0x00FF;
     packetBuffer_[15] = crc & 0x00FF;
     client.write(packetBuffer_, PACKET_LENGTH);
+    Serial.println("already return packet");
   }
 };
 
@@ -93,7 +114,6 @@ void CsClient::connect() {
     client.setTimeout(RECONECT_TIMEOUT);
   }
 }
-
 
 void CsClient::onConnected() {
 }

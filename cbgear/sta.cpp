@@ -30,7 +30,7 @@ void Sta::setup() {
   // handle cases when file is not found
   server.onNotFound([]() {
     // standard not found in browser.
-    server.send(404, "text/html", "Hello world");
+    server.send(404, "text/html", "Not Found");
   });
 
   server.begin();
