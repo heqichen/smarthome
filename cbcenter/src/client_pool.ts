@@ -7,14 +7,21 @@ type ClientStatus = {
     isDirty: boolean;
 };
 
-export default class ClientPool {
+const CLIENT_FAILED_NUM_THRESHOLD: number = 3;
 
+
+export default class ClientPool {
     private readonly clientList_: Map<string, SocketClient> = new Map<string, SocketClient>();
     private readonly clientStatusList_: Map<string, ClientStatus> = new Map<string, ClientStatus>();
+    private readonly dirtyClient_: Set<string> = new Set<string>;
     private readonly heartbeatTimer_: NodeJS.Timer;
     constructor() {
+        this.push = this.push.bind(this);
+        this.heartbeatRoutine = this.heartbeatRoutine.bind(this);
+
         this.clientList_.clear();
         this.clientStatusList_.clear();
+        this.dirtyClient_.clear();
         this.heartbeatTimer_ = setInterval(this.heartbeatRoutine, 3000);
     }
 
@@ -23,41 +30,48 @@ export default class ClientPool {
             console.error(signature.id, " already in the pool, close the coming one");
             socketClient.drop();
         }
+        console.log("add to pool");
         this.clientList_.set(signature.id, socketClient);
         this.clientStatusList_.set(signature.id, {
             id: signature.id,
             talkFailedNum: 0,
             isDirty: false
         });
-        // this.clientList_.push(socketClient);
-        // const status:ClientStatus = {
-        //     id: socketClient.
-        // };
     }
 
     heartbeatRoutine: () => void = (): void => {
-        // copy a name list from client list;
+        // delete dirty clients
+        this.dirtyClient_.forEach((id: string) => {
+            this.clientList_.get(id)?.drop();
+            this.clientList_.delete(id);
+            this.clientStatusList_.delete(id);
+            console.log(id, " has been removed");
+        });
 
+        this.dirtyClient_.clear();
+
+
+        // copy a name list from client list;
         const clientIdList: string[] = JSON.parse(JSON.stringify(Array.from(this.clientList_.keys()))) as string[]
         console.log("client list: ", clientIdList);
 
         clientIdList.forEach((id: string) => {
             this.clientList_.get(id)?.heartbeat().then((payload: Payload) => {
                 console.log("heartbeat good who you are?", id);
+                // update status
+                const clientStatus: ClientStatus = this.clientStatusList_.get(id) as ClientStatus;
+                clientStatus.talkFailedNum = 0;
+                this.clientStatusList_.set(id, clientStatus);
             }).catch((reason: string) => {
-                console.log("hearbeat error, ", id);
+                console.log("heartbeat error, ", id);
+                // Update status
+                const clientStatus: ClientStatus = this.clientStatusList_.get(id) as ClientStatus;
+                clientStatus.talkFailedNum++;
+                this.clientStatusList_.set(id, clientStatus);
+                if (clientStatus.talkFailedNum >= CLIENT_FAILED_NUM_THRESHOLD) {
+                    this.dirtyClient_.add(id);
+                }
             });
         });
-
-        // () => {
-        //     for (let i = 0; i < this.clientList_.length; ++i) {
-        //         this.clientList_[i].heartbeat().then(() => {
-        //             console.log("heartbeat success");
-        //         }).catch((reason: any) => {
-        //             console.log("heartbeat failed", reason)
-        //         });
-        //     }
-        // }
-
     }
 };

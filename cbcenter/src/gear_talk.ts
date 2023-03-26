@@ -2,33 +2,46 @@ import net from "net";
 import PacketParser, { PacketType, gearProtocol } from "./packet_parser";
 
 
-
-
 export type Payload = Buffer;
 
 // GearTalk is a protocol that communication with Gear and Center
 const COMMUNICATION_TIMEOUT: number = 12000;
-const AUTHENTICATION_TIMEOUT: number = 2000;
-const HEARTBEAT_TIMEOUT: number = 2000;
+const PACKET_TIMEOUT: number = 2000;
+
 export default class GearTalk {
     private readonly conn_: net.Socket;
     private packetParser_: PacketParser = new PacketParser();
     private requestTimer_: NodeJS.Timeout | undefined;
     private requestPacketId_: number = -1;
     private requestPacketType_: number = -1;
+    private isConnDied_: boolean = false;
 
     private readonly callbackMap_: Map<string, (d: Payload) => void> = new Map<string, (d: Payload) => void>([
         ["auth", (payload: Payload): void => { }],
         ["heartbeat", (payload: Payload): void => { }],
         ["invalidPacket", (reason: Payload): void => { }],
         ["packetTimeout", (reason: Payload): void => { }],
+        ["die", (reason: Payload): void => { }],
     ]);
 
 
     constructor(conn: net.Socket) {
+
+        this.onSocketEndHandler = this.onSocketEndHandler.bind(this);
+        this.on = this.on.bind(this);
+        this.clearStatus = this.clearStatus.bind(this);
+        this.callEvent = this.callEvent.bind(this);
+        this.onPacket = this.onPacket.bind(this);
+        this.requestPacket = this.requestPacket.bind(this);
+        this.requestAuthenticate = this.requestAuthenticate.bind(this);
+        this.requestHeartbeat = this.requestHeartbeat.bind(this);
+        this.drop = this.drop.bind(this);
+
         this.conn_ = conn;
         this.conn_.setTimeout(COMMUNICATION_TIMEOUT);
         this.packetParser_.onPacket(this.onPacket);
+
+
         conn.on("data", this.packetParser_.parse);
         conn.on("close", this.onSocketEndHandler);
         conn.on("end", this.onSocketEndHandler);
@@ -36,8 +49,10 @@ export default class GearTalk {
     }
 
     private onSocketEndHandler(): void {
-        console.log("TTTTTTTTTTDOOOOOOOOOO: socket end");
-        // TODO
+        this.isConnDied_ = true;
+        console.error(" TODO send msg to upper");
+
+        // TODO send msg to upper
     }
 
     on(event: string, callback: (d: any | undefined) => void) {
@@ -48,6 +63,11 @@ export default class GearTalk {
         }
     }
 
+    private clearStatus(): void {
+        clearTimeout(this.requestTimer_);
+        this.requestPacketId_ = -1;
+        this.requestPacketType_ = -1;
+    }
 
     private callEvent(event: string, d: any | undefined) {
         const callback = this.callbackMap_.get(event);
@@ -57,9 +77,6 @@ export default class GearTalk {
     private onPacket: (data: Buffer) => void = (data: Buffer): void => {
         const packetId: number = data.readUint16BE(2);
         const packetType: number = data.readUint16BE(4);
-
-        console.log("got packet", packetType);
-        console.log("compare packet id: ", this.requestPacketId_, packetId);
 
         const isPacketResponse: boolean = (data.readUint8(1) & 0x01) > 0;
         const isPacketIdMatch: boolean = packetId === this.requestPacketId_;
@@ -82,36 +99,33 @@ export default class GearTalk {
             this.callEvent("invalidPacket", Buffer.from("packet invalid"));
         }
 
-        clearTimeout(this.requestTimer_);
-        this.requestPacketId_ = -1;
-        this.requestPacketType_ = -1;
+        this.clearStatus();
     }
 
 
-    requestAuthenticate(): void {
-        // TODO: check timer and request id before send
-        // console.log("request authenticate");
-        const authRequestPacket: Buffer = gearProtocol.buildServerAuthenticationRequest();
-        this.requestTimer_ = setTimeout(() => {
-            this.callEvent("packetTimeout", Buffer.from("auth time up"));
-        }, AUTHENTICATION_TIMEOUT);
-        this.requestPacketId_ = authRequestPacket.readUint16BE(2);
 
-        // Send auth request
-        this.conn_.write(authRequestPacket);
+    private requestPacket(packet: Buffer): void {
+        if (this.isConnDied_) {
+            this.callEvent("die", "client die");
+        } else {
+            this.requestTimer_ = setTimeout(() => {
+                this.callEvent("packetTimeout", Buffer.from("auth time up"));
+            }, PACKET_TIMEOUT);
+            this.requestPacketId_ = packet.readUint16BE(2);
+            this.conn_.write(packet);
+        }
+    }
+
+    requestAuthenticate(): void {
+        const authRequestPacket: Buffer = gearProtocol.buildServerAuthenticationRequest();
+        this.requestPacket(authRequestPacket);
     }
 
     requestHeartbeat(): void {
-        // TODO: check timer and request id before send
         const heartbeatRequestPacket: Buffer = gearProtocol.buildHeartbeatRequest();
-        console.log("write heartbeat out");
-        this.requestTimer_ = setTimeout(() => {
-            console.log("packet timeout");
-            this.callEvent("packetTimeout", Buffer.from("time out"));
-        }, HEARTBEAT_TIMEOUT);
-        this.requestPacketId_ = heartbeatRequestPacket.readUInt16BE(2);
-        this.conn_.write(heartbeatRequestPacket);
+        this.requestPacket(heartbeatRequestPacket);
     }
+
     drop: () => void = (): void => {
         clearTimeout(this.requestTimer_);
         this.conn_.destroy();

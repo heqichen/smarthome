@@ -52,7 +52,7 @@ socket.connect(netOpt, () => {
                 data.writeUint16BE(crc, 14);
                 setTimeout(() => {
                     socket.write(data);
-                }, (1950));
+                }, (50));
                 break;
             }
             case (0x0631): {
