@@ -28,12 +28,18 @@ TODO:
 [#] config page add host config
 [#] config add version number.
 [#] If version number in config mismatch with application, make the config invalid.
-[ ] Bug: When connect TCP server. It takes long time and no response to physical button.
+[#] Bug: When connect TCP server. It takes long time and no response to physical button.
 
 --- For Documentation
 [ ] Add test module, photo, version or config
 
 
+
+heartbeat occur 3s once
+heartbeat timeout is 2 seconds
+
+
+Gears 
 
 0-Test
 ESP-01
