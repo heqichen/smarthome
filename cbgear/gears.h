@@ -17,10 +17,16 @@ public:
 uint8_t * getStatusBuffer();
 private:
   void setupDevicePin();
+  void onButtonChanged(int inIdx);
+
   int type_ {-1};
 
-  int inputStatus_[MAX_HARDWARE_PORT_NUMBER];
-  int lastInputRead_[MAX_HARDWARE_PORT_NUMBER];
+  int inputRead_[MAX_HARDWARE_PORT_NUMBER];
+  int latestInputRead_[MAX_HARDWARE_PORT_NUMBER];
+
+  bool inputStatus_[MAX_HARDWARE_PORT_NUMBER]; // is activated
+  bool outputStatus_[MAX_HARDWARE_PORT_NUMBER]; // is activated
+  
   uint64_t lastInputChangedTime_[MAX_HARDWARE_PORT_NUMBER];
 
   bool isDirty_ {false};

@@ -12,6 +12,7 @@ static ESP8266WebServer server(80);
 static CsClient csClient;
 static PacketEncoder packetEncoder;
 
+static wl_status_t lastWifiStatus;
 void Sta::setup() {
   // start WiFI
   WiFi.mode(WIFI_STA);
@@ -25,11 +26,7 @@ void Sta::setup() {
   Serial.print(g_config.password);
   Serial.print(" : ");
   Serial.println(g_config.host);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.println(".");
-  }
-  Serial.println("connected.\n");
+  lastWifiStatus = WiFi.status();
 
   server.on("/reset", HTTP_GET, []() {
     g_config.type = 0;
@@ -49,17 +46,19 @@ void Sta::setup() {
 
 
 void Sta::loop() {
-  
-  // For HTTP
-  server.handleClient();
+  wl_status_t currentWifiStatus = WiFi.status();
+  if ((lastWifiStatus != currentWifiStatus) && (currentWifiStatus == WL_CONNECTED)) {
+    Serial.println("wifi connected.\n");
+  }
+  lastWifiStatus = currentWifiStatus;
 
-  // For TCP Client
-  csClient.loop();
+  if (currentWifiStatus == WL_CONNECTED) {
+    // For HTTP
+    server.handleClient();
 
-  // Check wifi status
-  // if (WiFi.status() != WL_CONNECTED) {
-  //   Serial.println("hoho hohoh");
-  // }
+    // For TCP Client
+    csClient.loop();
+  }
 }
 
 void Sta::sendUserAction(const uint8_t *payload) {
