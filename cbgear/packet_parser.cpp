@@ -42,10 +42,10 @@ void PacketParser::decodePacket() {
 void PacketParser::handlePacket() {
   const uint8_t packetAttr = packetBuffer_[1];
   const uint16_t packetId = (packetBuffer_[2] << 8) | packetBuffer_[3];
-  const uint16_t packetType = (packetBuffer_[4] << 8) | packetBuffer_[5];
+  const PacketType packetType = static_cast<PacketType>((packetBuffer_[4] << 8) | packetBuffer_[5]);
 
   switch (packetType) {
-    case (PACKET_TYPE_AUTH):
+  case (PacketType::AUTH):
       {
         // response it immediately
         packetBuffer_[1] = packetAttr | 0x01;
@@ -55,7 +55,7 @@ void PacketParser::handlePacket() {
         }
         break;
       }
-    case (PACKET_TYPE_HEARTBEAT):
+    case (PacketType::HEARTBEAT):
       {
         // response it immediately
         Serial.print("heart beat");
@@ -79,4 +79,29 @@ void PacketParser::handlePacket() {
     client_->write((const char *)packetBuffer_, PACKET_LENGTH);
     Serial.println("already return packet");
   }
+}
+
+
+/////////////////////////////////////////////// Encoder ///////////////////////////////////
+
+
+uint8_t *PacketEncoder::EncodeUserAction(const uint8_t *payload) {
+  const uint16_t packetType =static_cast<uint16_t>(PacketType::USER_ACTION);
+  packetId_++;
+
+  packetBuffer_[0] = PACKET_HEADER;
+  packetBuffer_[1] = 0x00;  // request
+  packetBuffer_[2] = (packetId_ >> 8) & 0x00FF;
+  packetBuffer_[3] = packetId_ & 0x00FF;
+  packetBuffer_[4] = (packetType >> 8) & 0x00FF;
+  packetBuffer_[5] = packetType & 0x00FF;
+  for (int i = 0; i < 8; ++i) {
+    packetBuffer_[6 + i] = payload[i];
+  }
+  packetBuffer_[14] = 0U;
+  packetBuffer_[15] = 0U;
+  const uint16_t crc = calculateCrc(packetBuffer_, PACKET_LENGTH);
+  packetBuffer_[14] = (crc >> 8) & 0x00FF;
+  packetBuffer_[15] = crc & 0x00FF;
+  return packetBuffer_;
 }

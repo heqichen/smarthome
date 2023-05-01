@@ -5,12 +5,16 @@
 #include <stdint.h>
 #include <ESPAsyncTCP.h>
 
-constexpr uint64_t PACKET_TIMEOUT_THRESHOLD {400U};
+constexpr uint64_t PACKET_TIMEOUT_THRESHOLD{ 400U };
 
 constexpr uint32_t PACKET_LENGTH{ 16U };
 constexpr uint8_t PACKET_HEADER{ 0xA5 };
-constexpr uint16_t PACKET_TYPE_AUTH{ 0x0203 };
-constexpr uint16_t PACKET_TYPE_HEARTBEAT{ 0x0631 };
+
+enum class PacketType : uint16_t {
+  AUTH = 0x0203,
+  HEARTBEAT = 0x0631,
+  USER_ACTION = 0x0707
+};
 
 
 class PacketParser {
@@ -21,12 +25,20 @@ private:
   uint8_t packetBuffer_[PACKET_LENGTH];
   uint32_t packetOffset_{ 0U };
   uint64_t lastDataMillis_{ 0U };
-  AsyncClient *client_{nullptr};
+  AsyncClient *client_{ nullptr };
 
   void decodePacket();
   void handlePacket();
 };
 
 
-#endif
+class PacketEncoder {
+public:
+  uint8_t *EncodeUserAction(const uint8_t *payload);
+private:
+  uint8_t packetBuffer_[PACKET_LENGTH];
+  uint16_t packetId_ {1U};
+};
 
+
+#endif

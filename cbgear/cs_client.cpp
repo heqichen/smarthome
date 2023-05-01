@@ -6,7 +6,7 @@ static PacketParser packetParser;
 
 
 constexpr uint64_t RECONECT_TIMEOUT = 7000U;  // reconnect after lost connection, this value is to avoid high frequency reconnect
-constexpr uint64_t RX_TIMEOUT = 5U;           // data timeout, 
+constexpr uint64_t RX_TIMEOUT = 5U;           // data timeout,
 constexpr uint64_t ACK_TIMEOUT = 5000U;
 // void CsClient::setup() {
 //   connect();
@@ -171,6 +171,11 @@ void CsClient::connect() {
   _client->onPoll(onPollCallback, this);
   _client->connect(g_config.host, 8113);
 }
-void CsClient::write(uint8_t *data, uint32_t len) {
-  _client->write((char *)data, len);
+bool CsClient::write(const uint8_t *data, const uint32_t len) {
+  if (_client == nullptr) {
+    return false;
+  } else {
+    _client->write((const char *)data, len);
+  }
+  return true;
 }

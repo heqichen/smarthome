@@ -4,10 +4,13 @@
 #include <ESP8266WebServer.h>
 #include "config.h"
 #include "cs_client.h"
+#include "packet_parser.h"
+
 
 
 static ESP8266WebServer server(80);
 static CsClient csClient;
+static PacketEncoder packetEncoder;
 
 void Sta::setup() {
   // start WiFI
@@ -57,4 +60,9 @@ void Sta::loop() {
   // if (WiFi.status() != WL_CONNECTED) {
   //   Serial.println("hoho hohoh");
   // }
+}
+
+void Sta::sendUserAction(const uint8_t *payload) {
+  const uint8_t *packet = packetEncoder.EncodeUserAction(payload);
+  csClient.write(packet, PACKET_LENGTH);
 }

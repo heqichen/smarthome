@@ -10,7 +10,7 @@ class CsClient {
 public:
   void setup();
   void loop();
-  void write(uint8_t *data, uint32_t len);
+  bool write(const uint8_t *data, const uint32_t len);
 
   void onConnect(AsyncClient *client);
   void onDisconnected(AsyncClient *client);

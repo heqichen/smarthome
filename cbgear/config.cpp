@@ -135,43 +135,6 @@ void makeName() {
 }
 
 
-void defaultPinSetup() {
-  pinMode(2, INPUT);
-  pinMode(4, INPUT);
-  pinMode(5, INPUT);
-  pinMode(12, INPUT);
-  pinMode(13, INPUT);
-  pinMode(14, INPUT);
-  pinMode(15, INPUT);
-}
-
-void devicePinSetup() {
-  // ['None','0-Test','1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor'];
-  Serial.print("config to gear type: ");
-  Serial.println(g_config.type);
-  switch (g_config.type) {
-    case (1): { // For test
-      pinMode(2, INPUT_PULLUP);  
-      break;
-    }
-    case (5):
-      {  // SLOT
-        // Relay
-        pinMode(4, OUTPUT);
-        digitalWrite(4, LOW);
-        // Key, push to ground
-        pinMode(12, INPUT_PULLUP);
-        // LED, high to light
-        pinMode(13, OUTPUT);
-        digitalWrite(13, LOW);
-        break;
-      }
-    default: {
-      Serial.println("Gear type not configured! \n TODO: Need invalidate the configuration.");
-      break;
-    }
-  }
-}
 
 
 
@@ -184,9 +147,4 @@ void hardwareSetup() {
   g_mode = isConfigured ? Mode::STA : Mode::AP;
   readMacAddress();
   makeName();
-
-  defaultPinSetup();
-  if (isConfigured) {
-    devicePinSetup();
-  }
 }
