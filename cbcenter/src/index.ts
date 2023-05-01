@@ -2,6 +2,8 @@ import * as net from 'net';
 import SocketClient, { GearSignature } from "./socket_client";
 import ClientPool from "./client_pool";
 import { Payload } from './gear_talk';
+import "./uiserver/index";
+
 
 const clientPool: ClientPool = new ClientPool();
 

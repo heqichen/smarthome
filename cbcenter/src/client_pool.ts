@@ -8,6 +8,7 @@ type ClientStatus = {
 };
 
 const CLIENT_FAILED_NUM_THRESHOLD: number = 3;
+const HEARTBEAT_INTERVAL = 3000;
 
 
 export default class ClientPool {
@@ -22,7 +23,7 @@ export default class ClientPool {
         this.clientList_.clear();
         this.clientStatusList_.clear();
         this.dirtyClient_.clear();
-        this.heartbeatTimer_ = setInterval(this.heartbeatRoutine, 3000);
+        this.heartbeatTimer_ = setInterval(this.heartbeatRoutine, HEARTBEAT_INTERVAL);
     }
 
     push: (socketClient: SocketClient, signature: GearSignature) => void = (socketClient: SocketClient, signature: GearSignature): void => {

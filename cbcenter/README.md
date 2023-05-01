@@ -25,6 +25,19 @@ TODO:
 
 -- For gear
 [X] Wite Socket config if config is not right
-[ ] config page add host config
+[#] config page add host config
+[#] config add version number.
+[#] If version number in config mismatch with application, make the config invalid.
+[ ] Bug: When connect TCP server. It takes long time and no response to physical button.
+
+--- For Documentation
+[ ] Add test module, photo, version or config
+
+
+
+0-Test
+ESP-01
+GPIO02 as input internal pullup
+
 
 
