@@ -8,6 +8,7 @@
 
 static ESP8266WebServer server(80);
 static CsClient csClient;
+
 void Sta::setup() {
   // start WiFI
   WiFi.mode(WIFI_STA);
@@ -16,6 +17,11 @@ void Sta::setup() {
   WiFi.setHostname(g_hostname);
 
   Serial.println("Connect to WiFi...\n");
+  Serial.print(g_config.essid);
+  Serial.print(" | ");
+  Serial.print(g_config.password);
+  Serial.print(" : ");
+  Serial.println(g_config.host);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.println(".");
@@ -43,6 +49,8 @@ void Sta::loop() {
   
   // For HTTP
   server.handleClient();
+
+  // For TCP Client
   csClient.loop();
 
   // Check wifi status

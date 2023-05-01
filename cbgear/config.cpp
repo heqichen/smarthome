@@ -30,6 +30,8 @@ uint16_t calculateCrc(uint8_t* dataPtr, size_t len) {
 
 
 bool readEepromConfig() {
+  bool result = true;
+
   uint8_t* baseAddr = (uint8_t*)(&g_config);
   for (size_t i = 0U; i < EEPROM_SIZE; ++i) {
     *(baseAddr + i) = EEPROM.read(i);
@@ -49,11 +51,33 @@ bool readEepromConfig() {
     Serial.println(readoutCrc);
   }
 
-  // TODO: check essid > 0 ? and type != 0 ?
-  if (expectCrc == readoutCrc) {
-    return g_config.type != 0;
+  // For safe reason, go through all checks.  
+  // Advanded check
+  // CRC must match
+  if (expectCrc != readoutCrc) {
+    result = false;
   }
-  return false;
+  // If type is 0[None], always false
+  if (g_config.type == 0) {
+    result = false;
+  }
+
+  // If the host is empty, always false
+  if (g_config.host[0] == '\0') {
+    result = false;
+  }
+
+  // If the application version is not match, always false
+  if (g_config.appVersion != APPLICATION_VERSION) {
+    result = false;
+  }
+
+  // Check essid is none ?
+  if (g_config.essid[0] == '\0') {
+    result = false;
+  }
+  
+  return result;
 }
 
 void writeEepromConfig() {
@@ -122,10 +146,14 @@ void defaultPinSetup() {
 }
 
 void devicePinSetup() {
-  // ['None','1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor'];
+  // ['None','0-Test','1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor'];
   Serial.print("config to gear type: ");
   Serial.println(g_config.type);
   switch (g_config.type) {
+    case (1): { // For test
+      pinMode(2, INPUT_PULLUP);  
+      break;
+    }
     case (5):
       {  // SLOT
         // Relay
@@ -138,6 +166,10 @@ void devicePinSetup() {
         digitalWrite(13, LOW);
         break;
       }
+    default: {
+      Serial.println("Gear type not configured! \n TODO: Need invalidate the configuration.");
+      break;
+    }
   }
 }
 

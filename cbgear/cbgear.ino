@@ -4,10 +4,8 @@
 #include "sta.h"
 
 
-
-
-Portal portal;
-Sta sta;
+static Portal portal;
+static Sta sta;
 
 
 void setup() {
@@ -29,15 +27,16 @@ void loop() {
   // Serial.println(EEPROM_SIZE);
   // delay(10);
   if (g_mode == Mode::AP) {
-    portal.loop();
+    portal.loop();      // Standalone mode for configuration
   } else {
-    sta.loop();
-    int currentStatus = digitalRead(12);
+    sta.loop();         // Working mode
+    // Serial.print('.');
+    int currentStatus = digitalRead(2);
     if (keyStatus != currentStatus) {
       keyStatus = currentStatus;
       Serial.print("key changed ");
       Serial.println(currentStatus);
-      digitalWrite(13, keyStatus);
+      // digitalWrite(13, keyStatus);
     }
   }
 }

@@ -58,9 +58,14 @@ void Portal::setup() {
     // Save essid to config
     webServer.arg("s").toCharArray(g_config.essid, sizeof(g_config.essid) - 1);
     // Save password to config
-    webServer.arg("p").toCharArray(g_config.password, sizeof(g_config.password) - 1);
+    webServer.arg("w").toCharArray(g_config.password, sizeof(g_config.password) - 1);
+    // Save host to confg
+    webServer.arg("h").toCharArray(g_config.host, sizeof(g_config.host) - 1);
     // Save type to config
     g_config.type = webServer.arg("t").toInt();
+
+    // set application version
+    g_config.appVersion = APPLICATION_VERSION;
     
     writeEepromConfig();
     ESP.restart();

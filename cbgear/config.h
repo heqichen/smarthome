@@ -4,10 +4,14 @@
 #include <ESP8266WiFi.h>
 #include <stdint.h>
 
+#define APPLICATION_VERSION 7U
+
 struct Config {
   char essid[16];
   char password[16];
   int type;
+  uint16_t appVersion;
+  char host[16];
   uint16_t crc;
 };
 
