@@ -13,7 +13,8 @@ constexpr uint8_t PACKET_HEADER{ 0xA5 };
 enum class PacketType : uint16_t {
   AUTH = 0x0203,
   HEARTBEAT = 0x0631,
-  USER_ACTION = 0x0707
+  USER_ACTION = 0x0707,
+  SINGLE_VALUE = 0x0801,
 };
 
 
@@ -28,7 +29,9 @@ private:
   AsyncClient *client_{ nullptr };
 
   void decodePacket();
-  void handlePacket();
+  void processPacket();
+  void handleSpecificPacket(const uint16_t packetId, const uint8_t packetAttr, const PacketType packetType);
+  
 };
 
 
@@ -37,7 +40,7 @@ public:
   uint8_t *EncodeUserAction(const uint8_t *payload);
 private:
   uint8_t packetBuffer_[PACKET_LENGTH];
-  uint16_t packetId_ {1U};
+  uint16_t packetId_{ 1U };
 };
 
 

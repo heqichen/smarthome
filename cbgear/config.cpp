@@ -3,10 +3,13 @@
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <stdint.h>
+#include "gears.h"
+
 
 
 Config g_config;
 Mode g_mode;
+Gears g_gears;
 uint32_t g_chipId;
 uint8_t g_mac[6];
 char g_wifiName[20];

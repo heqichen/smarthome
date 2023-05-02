@@ -2,19 +2,17 @@
 #include "portal.h"
 #include "config.h"
 #include "sta.h"
-#include "gears.h"
 
 
 static Portal portal;
 static Sta sta;
-static Gears gears;
 
 void setup() {
   // put your setup code here, to run once:
 
   // Hardwrare initialize
   hardwareSetup();
-  gears.setup();
+  g_gears.setup();
   if (g_mode == Mode::AP) {
     portal.setup();
   } else {
@@ -33,10 +31,11 @@ void loop() {
   } else {
     sta.loop();  // Working mode
   }
-  gears.loop();
-  if (gears.isDirty()) {
+  g_gears.loop();
+  if (g_gears.isDirty()) {
     Serial.println("gear dirty");
-    uint8_t *payload = gears.getStatusBuffer();
+    const uint8_t *payload = g_gears.getStatusBuffer();
+
     if (g_mode == Mode::AP) {
       // TOOD
     } else {

@@ -8,37 +8,6 @@ static PacketParser packetParser;
 constexpr uint64_t RECONECT_TIMEOUT = 7000U;  // reconnect after lost connection, this value is to avoid high frequency reconnect
 constexpr uint64_t RX_TIMEOUT = 5U;           // data timeout,
 constexpr uint64_t ACK_TIMEOUT = 5000U;
-// void CsClient::setup() {
-//   connect();
-// }
-// void CsClient::loop() {
-//   Serial.print('1');
-//   Serial.print("status:");
-//   Serial.println(client.status());
-//   if (client.status() == tcp_state::ESTABLISHED) {
-//     Serial.print('2');
-//     lastConnectedTime = millis();
-//     packetParser.parse();
-//     Serial.print('3');
-//   }
-//   Serial.print('4');
-//   if ((millis() - lastConnectedTime) > RECONECT_TIMEOUT) {
-//     // client.stop();
-//     // connect();
-//   }
-//   Serial.println('5');
-// }
-
-// void CsClient::connect() {
-//   lastConnectedTime = millis();
-//   if (client.connect(g_config.host, 8113)) {
-//     onConnected();
-//     client.setTimeout(RECONECT_TIMEOUT);
-//   }
-// }
-
-// void CsClient::onConnected() {
-// }
 
 
 static void onConnectCallback(void *arg, AsyncClient *client) {

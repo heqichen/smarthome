@@ -201,7 +201,7 @@ void Gears::setup() {
     outputStatus_[i] = false;
   }
 
-  for (int i = 0; i < 8; ++i) {
+  for (int i = 0; i < PAYLOAD_LENGTH; ++i) {
     gearStatusPayloadBuffer_[i] = 0;
   }
 }
@@ -268,10 +268,10 @@ uint8_t *Gears::getStatusBuffer() {
       if (inputStatus_[i]) by |= 0x01;
     }
     gearStatusPayloadBuffer_[0] = by;
-    
+
     by = 0U;
-    const std::vector<Output> & outputList {GEAR_OUTPUT_LIST[type_]};
-    for (int i=0;  i< outputList.size(); ++i) {
+    const std::vector<Output> &outputList{ GEAR_OUTPUT_LIST[type_] };
+    for (int i = 0; i < outputList.size(); ++i) {
       by <<= 1;
       if (outputStatus_[i]) by |= 0x01;
     }
@@ -281,6 +281,16 @@ uint8_t *Gears::getStatusBuffer() {
   return gearStatusPayloadBuffer_;
 }
 
+void Gears::setOutputValue(uint8_t portIdx, uint8_t value) {
+  if (type_ > 0) {
+    const std::vector<Output> &outputList{ GEAR_OUTPUT_LIST[type_] };
+    if (value < outputList.size()) {
+      const Output &output {outputList[portIdx]};
+      outputStatus_[portIdx] = !!(value);
+      digitalWrite(output.port, getOutputLevel(outputStatus_[portIdx], output.mode));
+    }
+  }
+}
 
 void Gears::onButtonChanged(int inIdx) {
   // Get Input configuration
@@ -299,15 +309,4 @@ void Gears::onButtonChanged(int inIdx) {
       digitalWrite(output.port, getOutputLevel(outputStatus_[link.outIdx], output.mode));
     }
   }
-
-  // if (type_ == 6) {
-  //   const int outputPin{ GEAR_OUTPUT_LIST[type_][0] };
-  //   if (getInputActivation(currentStatus, inputMode)) {
-  //     Serial.println("H");
-  //     digitalWrite(outputPin, HIGH);
-  //   } else {
-  //     Serial.println("L");
-  //     digitalWrite(outputPin, LOW);
-  //   }
-  // }
 }

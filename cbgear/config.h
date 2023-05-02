@@ -3,8 +3,12 @@
 
 #include <ESP8266WiFi.h>
 #include <stdint.h>
+#include "gears.h"
 
 #define APPLICATION_VERSION 7U
+
+
+class Gears;
 
 struct Config {
   char essid[16];
@@ -24,11 +28,13 @@ enum Mode : uint8_t {
 
 extern Config g_config;
 extern Mode g_mode;
+extern Gears g_gears;
 extern uint32_t g_chipId;
 extern char g_wifiName[20];
 extern char g_hostname[12];
 extern char g_idStr[8];
 extern uint8_t g_mac[6];
+
 
 uint16_t calculateCrc(uint8_t* dataPtr, size_t len);
 void writeEepromConfig();
