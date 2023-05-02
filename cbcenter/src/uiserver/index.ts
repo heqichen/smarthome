@@ -1,36 +1,57 @@
 import express from "express";
 import dotenv from "dotenv";
-import bodyParser from "body-parser";
-
-dotenv.config();
-
-const app: express.Express = express();
-let port: number = process.env.PORT ? parseInt(process.env.PORT) : -1;
-
-if (port <= 0) {
-    console.log("invalid port use 8080");
-    port = 8080;
-}
 
 
-// app.get('/', (req: express.Request, res: express.Response) => {
-//     res.send('Express + TypeScript Server');
-// });
+export default class Uiserver {
 
-const router: express.Router = express.Router();
-// router.use(bodyParser.json());
-router.use(express.json());
+    private onEventCallback_: (dat: any) => void;
 
-router.get("/test", (req: express.Request, resp: express.Response) => {
-    resp.send({ "result": true });
-});
+    constructor(callback: (dat: any) => void) {
+        this.onEventCallback_ = callback;
+        dotenv.config();
+
+        const app: express.Express = express();
+        let port: number = process.env.PORT ? parseInt(process.env.PORT) : -1;
+
+        if (port <= 0) {
+            console.log("invalid port use 8080");
+            port = 8080;
+        }
 
 
-app.use("/api", router);
-app.use("/", express.static("./static/"));
+        // app.get('/', (req: express.Request, res: express.Response) => {
+        //     res.send('Express + TypeScript Server');
+        // });
 
-console.log("process.env.cwd", process.env.PWD);
+        const router: express.Router = express.Router();
+        // router.use(bodyParser.json());
+        router.use(express.json());
 
-app.listen(port, () => {
-    console.log("Start on port.", port);
-});
+        router.get("/test", (req: express.Request, resp: express.Response) => {
+            resp.send({ "result": true });
+        });
+
+        router.get("/on", (req: express.Request, resp: express.Response) => {
+            this.onEventCallback_(true);
+            resp.send({ "result": true });
+        });
+
+        router.get("/off", (req: express.Request, resp: express.Response) => {
+            this.onEventCallback_(false);
+            resp.send({ "result": true });
+        });
+
+
+
+
+        app.use("/api", router);
+        app.use("/", express.static("./static/"));
+
+        console.log("process.env.cwd", process.env.PWD);
+
+        app.listen(port, () => {
+            console.log("Start on port.", port);
+        });
+    }
+};
+

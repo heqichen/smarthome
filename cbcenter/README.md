@@ -22,6 +22,10 @@ TODO:
 [#] Request heartbeat to Gear
 [#] handle heartbeat not response
 [ ] Mock Gear can return heartbeat
+[#] Can receive heartbeat payload
+[#] Can set single value
+[ ] Can set all value
+[ ] Can set mask on heartbeat
 
 -- For gear
 [X] Wite Socket config if config is not right
@@ -29,6 +33,17 @@ TODO:
 [#] config add version number.
 [#] If version number in config mismatch with application, make the config invalid.
 [#] Bug: When connect TCP server. It takes long time and no response to physical button.
+[#] Remove hardware setup code
+[#] Configure pinMode using config 
+[#] Read mode and write debounce
+[#] Send notification to server
+[#] Bug: gear dirty after startup
+[#] Fatal: crash if send out something
+[#] Implement heartbeat status report
+[#] Bug, block while connecting wifi
+[ ] Can receive single value
+[ ] Can receive all value
+[ ] Can receive mask
 
 --- For Documentation
 [ ] Add test module, photo, version or config
@@ -47,3 +62,7 @@ GPIO02 as input internal pullup
 
 
 
+6 - SLOT
+GPIO4 - RELAY
+GPIO12 BUTTON, internal pull up
+GPIO13 - LED

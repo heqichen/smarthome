@@ -3,6 +3,11 @@ import * as Utils from "./utils";
 export enum PacketType {
     AUTH = 0x0203,
     HEARTBEAT = 0x0631,
+
+
+    USER_ACTION = 0x0707,
+
+    SINGLE_VALUE = 0x0801,
 };
 
 
@@ -12,7 +17,7 @@ const PACKET_LENGTH: number = 16;
 const PACKET_TIMEOUT_THRESHOLD: number = 400;
 const PACKET_HEADER: number = 0xA5;
 
-
+const PACKET_ATTR_REQUEST_WITHOUT_ACK: number = 0x02;
 
 
 class GearProtocol {
@@ -55,6 +60,23 @@ class GearProtocol {
         buf.writeUint16BE(PacketType.HEARTBEAT, 4);
         // buf[6] = 0;
         // ...
+        const crc: number = Utils.calculateCrc(buf);
+
+        buf.writeUint16BE(crc, 14);
+        return buf;
+    }
+
+    buildSetSingleValue(port: number, value: number): Buffer {
+        const buf: Buffer = Buffer.alloc(PACKET_LENGTH);
+        buf.fill(0);
+        const packetId = this.makePacketId();
+        buf[0] = PACKET_HEADER; // head
+        buf[1] = PACKET_ATTR_REQUEST_WITHOUT_ACK; // packet attribute, 20 
+        buf.writeUint16BE(packetId, 2);
+        buf.writeUint16BE(PacketType.SINGLE_VALUE, 4);
+        buf.writeUint8(port, 6);
+        buf.writeUint8(value, 7);
+
         const crc: number = Utils.calculateCrc(buf);
 
         buf.writeUint16BE(crc, 14);

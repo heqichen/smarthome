@@ -26,6 +26,14 @@ export default class ClientPool {
         this.heartbeatTimer_ = setInterval(this.heartbeatRoutine, HEARTBEAT_INTERVAL);
     }
 
+    setSingleValue: (id: string, port: number, value: number) => void = (id: string, port: number, value: number): void => {
+        if (this.clientList_.has(id)) {
+            this.clientList_.get(id)?.setSingleValue(port, value);
+        } else {
+            console.log("id not found", id);
+        }
+    }
+
     push: (socketClient: SocketClient, signature: GearSignature) => void = (socketClient: SocketClient, signature: GearSignature): void => {
         if (this.clientList_.has(signature.id)) {
             console.error(signature.id, " already in the pool, close the coming one");
@@ -68,8 +76,9 @@ export default class ClientPool {
                 const clientStatus: ClientStatus = this.clientStatusList_.get(id) as ClientStatus;
                 clientStatus.talkFailedNum = 0;
                 this.clientStatusList_.set(id, clientStatus);
+                console.log(payload);
             }).catch((reason: string) => {
-                console.log("heartbeat error, ", id);
+                console.log("heartbeat error, ", id, " reason [", reason, "]");
                 // Update status
                 const clientStatus: ClientStatus = this.clientStatusList_.get(id) as ClientStatus;
                 clientStatus.talkFailedNum++;

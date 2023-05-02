@@ -19,8 +19,10 @@ export default class GearTalk {
     private readonly callbackMap_: Map<string, (d: Payload) => void> = new Map<string, (d: Payload) => void>([
         ["auth", (payload: Payload): void => { }],
         ["heartbeat", (payload: Payload): void => { }],
+        ["userAction", (payload: Payload): void => { }],
         ["invalidPacket", (reason: Payload): void => { }],
         ["packetTimeout", (reason: Payload): void => { }],
+        ["validResponse", (reason: Payload): void => { }],
         ["die", (reason: Payload): void => { }],
     ]);
 
@@ -36,6 +38,7 @@ export default class GearTalk {
         this.requestAuthenticate = this.requestAuthenticate.bind(this);
         this.requestHeartbeat = this.requestHeartbeat.bind(this);
         this.drop = this.drop.bind(this);
+        this.sendSetSingleValue = this.sendSetSingleValue.bind(this);
 
         this.conn_ = conn;
         this.conn_.setTimeout(COMMUNICATION_TIMEOUT);
@@ -86,17 +89,36 @@ export default class GearTalk {
             switch (packetType) {
                 case (PacketType.AUTH): {
                     this.callEvent("auth", packetPayload);
+                    break;
                 }
                 case (PacketType.HEARTBEAT): {
                     // TODO: move payload out;
-                    this.callEvent("heartbeat", null);
+                    this.callEvent("heartbeat", packetPayload);
+                    break;
+                }
+                case (PacketType.SINGLE_VALUE): {
+                    this.callEvent("validResponse", packetPayload);
+                    break;
                 }
                 default: {
                     this.callEvent("invalidPacket", Buffer.from("unknown packet"));
+                    break;
                 }
             }
         } else {
             this.callEvent("invalidPacket", Buffer.from("packet invalid"));
+        }
+
+        if (!isPacketResponse) {
+            switch (packetType) {
+                case (PacketType.USER_ACTION): {
+                    this.callEvent("userAction", packetPayload);
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
         }
 
         this.clearStatus();
@@ -109,7 +131,7 @@ export default class GearTalk {
             this.callEvent("die", "client die");
         } else {
             this.requestTimer_ = setTimeout(() => {
-                this.callEvent("packetTimeout", Buffer.from("auth time up"));
+                this.callEvent("packetTimeout", Buffer.from("time up"));
             }, PACKET_TIMEOUT);
             this.requestPacketId_ = packet.readUint16BE(2);
             this.conn_.write(packet);
@@ -129,5 +151,10 @@ export default class GearTalk {
     drop: () => void = (): void => {
         clearTimeout(this.requestTimer_);
         this.conn_.destroy();
+    }
+
+    sendSetSingleValue(port: number, value: number): void {
+        const packet: Buffer = gearProtocol.buildSetSingleValue(port, value);
+        this.conn_.write(packet);
     }
 };
