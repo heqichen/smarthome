@@ -4,10 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "npm run build && node build/index.js",
+        "start": "npm run build && node build/v2/index.js",
         "start:dev": "npx nodemon",
         "build": "rimraf ./build && tsc",
-        "test": "rimraf ./build/test && tsc && node build/test/auth.js"
+        "test": "rimraf ./build/test && tsc && node build/test/gear/index_test.js"
     },
     "author": "",
     "license": "ISC",
