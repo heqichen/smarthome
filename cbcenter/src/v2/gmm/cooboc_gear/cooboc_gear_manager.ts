@@ -1,6 +1,7 @@
 
 import net from "net";
 import CoobocGearAuthenticator from "./cooboc_gear_authenticator";
+import { CoobocGearType } from "./def";
 
 export default class CoobocGearManager {
     private readonly _server: net.Server = net.createServer();
@@ -14,7 +15,9 @@ export default class CoobocGearManager {
         const remoteAddress = conn.remoteAddress + ':' + conn.remotePort;
         console.log("client come");
         const auth = new CoobocGearAuthenticator(conn);
-        auth.authenticate().then(() => { }).catch((reason: string) => {
+        auth.authenticate().then((gear: CoobocGearType) => {
+            console.log("a gear connected", gear);
+        }).catch((reason: string) => {
             console.log("auth failed, reason: [", reason, "]");
         });
     }
