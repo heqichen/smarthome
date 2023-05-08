@@ -1,5 +1,5 @@
-
 import { PACKET_HEADER, PACKET_LENGTH, PACKET_OFFSET_ATTR, PACKET_OFFSET_CRC, PACKET_OFFSET_ID, PACKET_OFFSET_PAYLOAD, PACKET_OFFSET_PAYLOAD_END, PACKET_OFFSET_TYPE, PacketAttr, PacketType, calculateCrc } from "./def";
+import Config from "../../config";
 
 export type CoobocGearPacketType = {
     attr: number,
@@ -10,8 +10,6 @@ export type CoobocGearPacketType = {
 
 export type DecoderCallbackType = (packet: CoobocGearPacketType) => void;
 export default class CoobocGearDecoder {
-    private readonly PACKET_TIMEOUT_THRESHOLD: number = process.env.COOBOC_GEAR_PACKET_TIMEOUT_THRESHOLD ? parseInt(process.env.COOBOC_GEAR_PACKET_TIMEOUT_THRESHOLD) : 400;
-
     private _lastCommMillis: number = 0;
     private _packetOffset: number = 0;
     private _packetBuffer: Buffer = Buffer.alloc(PACKET_LENGTH);
@@ -68,7 +66,7 @@ export default class CoobocGearDecoder {
 
     readonly decode = (buffer: Buffer, callback: DecoderCallbackType): void => {
         const currentMillis: number = this.millis();
-        if ((currentMillis - this._lastCommMillis) > this.PACKET_TIMEOUT_THRESHOLD) {
+        if ((currentMillis - this._lastCommMillis) > Config.COOBOC_GEAR_PACKET_TIMEOUT_THRESHOLD) {
             this._packetOffset = 0;
         }
         this._lastCommMillis = currentMillis;

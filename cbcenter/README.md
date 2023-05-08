@@ -11,7 +11,7 @@ TODO:
 [ ] Put authed client to pool and send heartbeat
 [#] Check the spec of socket
 [#] make all pin input
-[/] make the pin to correct config when initialized
+[ ] make the pin to correct config when initialized
 [ ] push the button to toggle the relay status
 [ ] Release the button to send the status out
 [#] Make a programmer for socket
@@ -26,6 +26,8 @@ TODO:
 [#] Can set single value
 [ ] Can set all value
 [ ] Can set mask on heartbeat
+[#] Move all process.env to config object
+[/] Refactor the v2
 
 -- For gear
 [X] Wite Socket config if config is not right

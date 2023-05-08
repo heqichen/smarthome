@@ -72,7 +72,7 @@ export const extractCoobocGearType = (uint8: number): CoobocGearTypeType => {
 
 
 
-export type CoobocGearType = {
+export type CoobocGearSignatureType = {
     id: string,
     type: CoobocGearTypeType,
 };

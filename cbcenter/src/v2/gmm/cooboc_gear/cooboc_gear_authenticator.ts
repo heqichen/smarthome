@@ -1,18 +1,16 @@
 import net from "net";
 import CoobocGearEncoder from "./cooboc_gear_encoder";
 import CoobocGearDecoder, { CoobocGearPacketType, DecoderCallbackType } from "./cooboc_gear_decoder";
-import { CoobocGearType, CoobocGearTypeType, PACKET_OFFSET_ID, PacketAttr, PacketType, extractCoobocGearType } from "./def";
-
+import { CoobocGearSignatureType, CoobocGearTypeType, PACKET_OFFSET_ID, PacketAttr, PacketType, extractCoobocGearType } from "./def";
+import Config from "../../config";
 
 
 export default class CoobocGearAuthenticator {
-    private readonly AUTHENTICATION_TIMEOUT: number = process.env.COOBOC_GEAR_AUTHENTICATION_TIMEOUT ? parseInt(process.env.COOBOC_GEAR_AUTHENTICATION_TIMEOUT) : 200;
-
     private readonly _conn: net.Socket;
     private _authTimeout: NodeJS.Timeout | undefined = undefined;
     private _requestId: number = -139412349; // a random picked number, which is not exist in uint8
 
-    private _resolve: (gear: CoobocGearType) => void = () => { };
+    private _resolve: (gear: CoobocGearSignatureType) => void = () => { };
     private _reject: (reason: string) => void = () => { };
     private readonly _decoder: CoobocGearDecoder = new CoobocGearDecoder();
 
@@ -50,7 +48,7 @@ export default class CoobocGearAuthenticator {
         }
 
         const gearId = packet.payload.toString("utf-8", 1);
-        const gear: CoobocGearType = {
+        const gear: CoobocGearSignatureType = {
             "id": gearId,
             "type": gearType
         }
@@ -71,7 +69,7 @@ export default class CoobocGearAuthenticator {
         };
     }
 
-    private readonly acceptAuthenticate = (gear: CoobocGearType): void => {
+    private readonly acceptAuthenticate = (gear: CoobocGearSignatureType): void => {
         clearTimeout(this._authTimeout);
         this._requestId = -139412349;
         this._resolve(gear);
@@ -83,14 +81,14 @@ export default class CoobocGearAuthenticator {
     }
 
 
-    readonly authenticate = (): Promise<CoobocGearType> => {
-        return new Promise<CoobocGearType>((resolve: (gear: CoobocGearType) => void, reject: (reason: string) => void) => {
+    readonly authenticate = (): Promise<CoobocGearSignatureType> => {
+        return new Promise<CoobocGearSignatureType>((resolve: (gear: CoobocGearSignatureType) => void, reject: (reason: string) => void) => {
             this._resolve = resolve;
             this._reject = reject;
             this._authTimeout = setTimeout(() => {
                 this.rejectAuthenticate("auth timeout")();
-            }, this.AUTHENTICATION_TIMEOUT);
-            this._conn.setTimeout(parseInt(process.env.COOBOC_GEAR_CONN_DATA_TIMEOUT ? process.env.COOBOC_GEAR_CONN_DATA_TIMEOUT : "2000"));
+            }, Config.COOBOC_GEAR_AUTHENTICATION_TIMEOUT);
+            this._conn.setTimeout(Config.COOBOC_GEAR_CONN_DATA_TIMEOUT);
             this._conn.on("data", this.onConnectionDataCallback);
             this._conn.on("close", this.rejectAuthenticate("conn closed"));
             this._conn.on("end", this.rejectAuthenticate("conn end"));

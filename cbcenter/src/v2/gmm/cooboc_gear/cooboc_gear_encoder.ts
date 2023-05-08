@@ -1,4 +1,4 @@
-import { PacketAttr, PACKET_HEADER, PACKET_LENGTH, PacketType, calculateCrc } from "./def";
+import { PacketAttr, PACKET_HEADER, PACKET_LENGTH, PacketType, calculateCrc, PACKET_OFFSET_TYPE, PACKET_OFFSET_ID } from "./def";
 
 
 
@@ -17,8 +17,23 @@ class CoobocGearEncoder_ {
         const packetId = this.makePacketId();
         buf[0] = PACKET_HEADER; // head
         buf[1] = PacketAttr.REQUEST_ACK; // auth need ack
-        buf.writeUint16BE(packetId, 2);
-        buf.writeUint16BE(PacketType.AUTH, 4);
+        buf.writeUint16BE(packetId, PACKET_OFFSET_ID);
+        buf.writeUint16BE(PacketType.AUTH, PACKET_OFFSET_TYPE);
+
+        const crc: number = calculateCrc(buf);
+
+        buf.writeUint16BE(crc, 14);
+        return buf;
+    }
+
+    readonly buildHeartbeatPacket = (): Buffer => {
+        const buf: Buffer = Buffer.alloc(PACKET_LENGTH);
+        buf.fill(0);
+        const packetId = this.makePacketId();
+        buf[0] = PACKET_HEADER; // head
+        buf[1] = PacketAttr.REQUEST_ACK; // auth need ack
+        buf.writeUint16BE(packetId, PACKET_OFFSET_ID);
+        buf.writeUint16BE(PacketType.HEARTBEAT, PACKET_OFFSET_TYPE);
 
         const crc: number = calculateCrc(buf);
 
