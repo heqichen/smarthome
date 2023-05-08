@@ -1,6 +1,5 @@
 import CoobocGearManager from "./cooboc_gear/cooboc_gear_manager";
 
-
 type OnGearConnectedCallback = () => void;
 type OnGearDisconnectedCallback = () => void;
 

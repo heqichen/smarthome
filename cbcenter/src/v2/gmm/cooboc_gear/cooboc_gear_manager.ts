@@ -1,16 +1,21 @@
-
 import net from "net";
 import CoobocGearAuthenticator from "./cooboc_gear_authenticator";
 import { CoobocGearSignatureType } from "./def";
 import CoobocGear, { GearDisconnectedCallbackType } from "./cooboc_gear";
+import CoobocGearPool from "./cooboc_gear_pool";
 
 export default class CoobocGearManager {
     private readonly _server: net.Server = net.createServer();
+    private readonly _coobocGearPool: CoobocGearPool = new CoobocGearPool();
 
     constructor() {
         this.start = this.start.bind(this);
         this.newConnectionHandler = this.newConnectionHandler.bind(this);
         this.onCoobocGearDisconnected = this.onCoobocGearDisconnected.bind(this);
+
+        setInterval(() => {
+            console.log(this._coobocGearPool.getIdList());
+        }, 1000);
     }
 
     private readonly newConnectionHandler = (conn: net.Socket): void => {
@@ -20,6 +25,10 @@ export default class CoobocGearManager {
         auth.authenticate().then((gearSignature: CoobocGearSignatureType) => {
             console.log("a gear connected", gearSignature);
             const cooboc: CoobocGear = new CoobocGear(gearSignature, conn, this.onCoobocGearDisconnected);
+            this._coobocGearPool.insert(cooboc).then(() => { }).catch((reason: string) => {
+                console.log(reason, "ready to kill the gear");
+                cooboc.end();
+            });
         }).catch((reason: string) => {
             console.log("auth failed, reason: [", reason, "]");
         });
@@ -27,6 +36,8 @@ export default class CoobocGearManager {
 
     private readonly onCoobocGearDisconnected: GearDisconnectedCallbackType = (id: string, reason: string): void => {
         console.log(id, " disconnected", " reason: ", reason);
+        this._coobocGearPool.remove(id);
+        // TODO: notify parent layer
     };
 
     readonly start = (): Promise<void> => {

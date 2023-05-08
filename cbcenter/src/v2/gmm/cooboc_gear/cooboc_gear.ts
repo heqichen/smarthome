@@ -19,14 +19,16 @@ export default class CoobocGear {
         this.exterminate = this.exterminate.bind(this);
         this.sendRequestAckPacket = this.sendRequestAckPacket.bind(this);
         this.isGood = this.isGood.bind(this);
-
+        this.getId = this.getId.bind(this);
 
         this._heartbeatInterval = setInterval(() => {
             console.log("heartbeat");
             this.sendRequestAckPacket();
             const packet: Buffer = CoobocGearEncoder.buildHeartbeatPacket();
+            this._conn.write(packet);
         }, Config.COOBOC_GEAR_HEARTBEAT_INTERVAL);
-
+        console.log("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+        console.log(Config.COOBOC_GEAR_HEARTBEAT_INTERVAL);
 
         this._conn.setTimeout(Config.COOBOC_GEAR_CONN_DATA_TIMEOUT);
 
@@ -51,14 +53,22 @@ export default class CoobocGear {
 
     private readonly sendRequestAckPacket = (): void => {
 
-
-
-
     }
 
     readonly isGood = (): boolean => {
         return this._isGood;
     }
+
+    readonly getId = (): string => {
+        return this._signature.id;
+    }
+
+    readonly end = (): void => {
+        clearInterval(this._heartbeatInterval);
+        this._isGood = false;
+        this._conn.destroy();
+    }
+
 
 
 };
