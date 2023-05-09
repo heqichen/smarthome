@@ -46,6 +46,11 @@ export function calculateCrc(buf: Buffer): number {
     return crc;
 }
 
+export const millis = (): number => {
+    const time: [number, number] = process.hrtime();
+    return time[0] * 1000 + time[1] / 1000000;
+}
+
 // ['None','0-Test', '1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor'];
 
 export enum CoobocGearTypeType {

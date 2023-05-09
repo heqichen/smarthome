@@ -1,4 +1,4 @@
-import { PACKET_HEADER, PACKET_LENGTH, PACKET_OFFSET_ATTR, PACKET_OFFSET_CRC, PACKET_OFFSET_ID, PACKET_OFFSET_PAYLOAD, PACKET_OFFSET_PAYLOAD_END, PACKET_OFFSET_TYPE, PacketAttr, PacketType, calculateCrc } from "./def";
+import { PACKET_HEADER, PACKET_LENGTH, PACKET_OFFSET_ATTR, PACKET_OFFSET_CRC, PACKET_OFFSET_ID, PACKET_OFFSET_PAYLOAD, PACKET_OFFSET_PAYLOAD_END, PACKET_OFFSET_TYPE, PacketAttr, PacketType, calculateCrc, millis } from "./def";
 import Config from "../../config";
 
 export type CoobocGearPacketType = {
@@ -15,16 +15,12 @@ export default class CoobocGearDecoder {
     private _packetBuffer: Buffer = Buffer.alloc(PACKET_LENGTH);
 
     constructor() {
-        this.millis = this.millis.bind(this);
         this.decode = this.decode.bind(this);
         this.splitPacket = this.splitPacket.bind(this);
         this.validatePacket = this.validatePacket.bind(this);
         this.decodePacket = this.decodePacket.bind(this);
     }
-    private readonly millis = (): number => {
-        const time: [number, number] = process.hrtime();
-        return time[0] * 1000 + time[1] / 1000;
-    }
+
 
     private readonly splitPacket = (buffer: Buffer, callback: DecoderCallbackType): void => {
         for (let i = 0; i < buffer.length; ++i) {
@@ -65,7 +61,7 @@ export default class CoobocGearDecoder {
     }
 
     readonly decode = (buffer: Buffer, callback: DecoderCallbackType): void => {
-        const currentMillis: number = this.millis();
+        const currentMillis: number = millis();
         if ((currentMillis - this._lastCommMillis) > Config.COOBOC_GEAR_PACKET_TIMEOUT_THRESHOLD) {
             this._packetOffset = 0;
         }

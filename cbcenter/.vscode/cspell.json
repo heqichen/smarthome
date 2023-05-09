@@ -9,6 +9,7 @@
         "backtest",
         "cooboc",
         "Millis",
+        "pingpong",
         "rocksdb",
         "stoull"
     ],
