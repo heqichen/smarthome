@@ -11,3 +11,9 @@ gm.start().then(() => {
 });
 
 
+let bulb: boolean = false;
+setInterval(() => {
+    const targetValue = bulb ? 1 : 0;
+    bulb = !bulb;
+    gm.setOutputValue("3JSM700", 1, targetValue);
+}, 5000);

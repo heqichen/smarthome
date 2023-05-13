@@ -45,6 +45,25 @@ class CoobocGearEncoder_ {
         this._packetIncId++;
         return this._packetIncId;
     }
+
+
+    buildSetSingleValue(port: number, value: number): Buffer {
+        const buf: Buffer = Buffer.alloc(PACKET_LENGTH);
+        buf.fill(0);
+        const packetId = this.makePacketId();
+        buf[0] = PACKET_HEADER; // head
+        buf[1] = PacketAttr.REQUEST_WITHOUT_ACK; // packet attribute, 20 
+        buf.writeUint16BE(packetId, 2);
+        buf.writeUint16BE(PacketType.SINGLE_VALUE, 4);
+        buf.writeUint8(port, 6);
+        buf.writeUint8(value, 7);
+
+        const crc: number = calculateCrc(buf);
+
+        buf.writeUint16BE(crc, 14);
+        return buf;
+    }
+
 };
 
 const CoobocGearEncoder: CoobocGearEncoder_ = new CoobocGearEncoder_();

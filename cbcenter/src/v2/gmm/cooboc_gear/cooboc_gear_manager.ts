@@ -18,6 +18,7 @@ export default class CoobocGearManager {
         }, 1000);
     }
 
+
     private readonly newConnectionHandler = (conn: net.Socket): void => {
         const remoteAddress = conn.remoteAddress + ':' + conn.remotePort;
         console.log("client come");
@@ -48,5 +49,11 @@ export default class CoobocGearManager {
             });
             resolve();
         });
+    };
+
+    readonly hasGear: (id: string) => boolean = this._coobocGearPool.has;
+    readonly setGear = (id: string, channel: number, value: number): void => {
+        this._coobocGearPool.setGear(id, channel, value);
     }
+
 };

@@ -13,6 +13,8 @@ export default class GearManager {
     constructor() {
         this.onGearConnected = this.onGearConnected.bind(this);
         this.onGearDisconnected = this.onGearDisconnected.bind(this);
+        this.setOutputValue = this.setOutputValue.bind(this);
+
     }
 
     readonly onGearConnected = (callback: OnGearConnectedCallback): void => {
@@ -21,6 +23,8 @@ export default class GearManager {
     readonly onGearDisconnected = (callback: OnGearDisconnectedCallback): void => {
         this._onGearDisconnectedCallback = callback;
     };
+
+
 
     // start = (): Promise<void> => {
     //     return new Promise<void>((resolve: () => void, reject: () => void): void => {
@@ -33,6 +37,15 @@ export default class GearManager {
     // }
     readonly start = async (): Promise<void> => {
         await this._coobocGearManager.start();
+    }
+
+    readonly setOutputValue = (gearId: string, outputChannel: number, targetValue: number): void => {
+        if (this._coobocGearManager.hasGear(gearId)) {
+            this._coobocGearManager.setGear(gearId, outputChannel, targetValue);
+            console.log("has this id");
+        } else {
+            console.log("no id");
+        }
     }
 
 

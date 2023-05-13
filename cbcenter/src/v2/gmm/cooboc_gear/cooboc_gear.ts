@@ -104,6 +104,11 @@ export default class CoobocGear {
         this._conn.destroy();
     }
 
+    readonly setValue = (channel: number, value: number): void => {
+        const packet: Buffer = CoobocGearEncoder.buildSetSingleValue(channel, value);
+        this._conn.write(packet);
+    }
+
 
 
 };
