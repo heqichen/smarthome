@@ -43,12 +43,18 @@ TODO:
 [#] Fatal: crash if send out something
 [#] Implement heartbeat status report
 [#] Bug, block while connecting wifi
-[ ] Can receive single value
+[#] Can receive single value
 [ ] Can receive all value
 [ ] Can receive mask
+[#] html add dht11 ＆dht22
+[#] Can send out DHT11
+[ ] integration DHT11 into program
+[ ] For DHT11 interval read status and send out buffer directly by querying
+
 
 --- For Documentation
-[ ] Add test module, photo, version or config
+[#] Add test module, photo, version or config
+[ ] Documentation sensor
 
 
 
@@ -68,3 +74,6 @@ GPIO02 as input internal pullup
 GPIO4 - RELAY
 GPIO12 BUTTON, internal pull up
 GPIO13 - LED
+
+
+['None','0-Test','1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor','DHT11','DHT22']

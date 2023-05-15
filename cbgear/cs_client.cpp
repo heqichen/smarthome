@@ -5,9 +5,14 @@
 static PacketParser packetParser;
 
 
+// set a small time to debug
 constexpr uint64_t RECONECT_TIMEOUT = 7000U;  // reconnect after lost connection, this value is to avoid high frequency reconnect
 constexpr uint64_t RX_TIMEOUT = 5U;           // data timeout,
-constexpr uint64_t ACK_TIMEOUT = 5000U;
+constexpr uint64_t ACK_TIMEOUT = 400U;
+
+// constexpr uint64_t RECONECT_TIMEOUT = 20000U;  // reconnect after lost connection, this value is to avoid high frequency reconnect
+// constexpr uint64_t RX_TIMEOUT = 10U;           // data timeout,
+// constexpr uint64_t ACK_TIMEOUT = 400U;
 
 
 static void onConnectCallback(void *arg, AsyncClient *client) {

@@ -1,4 +1,11 @@
 #include "gears.h"
+#include <DHT.h>
+
+#define DHTTYPE DHT11
+#define DHTPIN  2
+
+static DHT *dht = nullptr;
+
 
 // ['None','0-Test','1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor'];
 
@@ -80,6 +87,7 @@ const std::vector<std::vector<Output>> GEAR_OUTPUT_LIST{
   {},
 };
 
+
 const std::vector<std::vector<Link>> GEAR_LINK_LIST{
   // 0 None
   {},
@@ -100,6 +108,8 @@ const std::vector<std::vector<Link>> GEAR_LINK_LIST{
   // 8
   {},
 };
+
+
 
 namespace {
 
@@ -154,37 +164,6 @@ void defaultPinSetup() {
   pinMode(15, INPUT_PULLUP);
 }
 
-void devicePinSetup() {
-  // ['None','0-Test','1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor'];
-  Serial.print("config to gear type: ");
-  Serial.println(g_config.type);
-  switch (g_config.type) {
-    case (1):
-      {  // For test
-        pinMode(2, INPUT_PULLUP);
-        break;
-      }
-    case (5):
-      {  // SLOT
-        // Relay
-        pinMode(4, OUTPUT);
-        digitalWrite(4, LOW);
-        // Key, push to ground
-        pinMode(12, INPUT_PULLUP);
-        // LED, high to light
-        pinMode(13, OUTPUT);
-        digitalWrite(13, LOW);
-        break;
-      }
-    default:
-      {
-        Serial.println("Gear type not configured! \n TODO: Need invalidate the configuration.");
-        break;
-      }
-  }
-}
-
-
 void Gears::setup() {
   defaultPinSetup();
 
@@ -206,55 +185,77 @@ void Gears::setup() {
   }
 }
 
+
 void Gears::setupDevicePin() {
   if (type_ > 0) {
+    switch (type_) {
+      case (GEAR_TYPE_DHT11):
+        {
+          dht = new DHT(DHTPIN, DHTTYPE, 11);
+          dht->begin();
+          break;
+        }
+      default:
+        {
+          // general IO gear
+          // Initialize Input
+          const std::vector<Input> &inputList{ GEAR_INPUT_LIST[type_] };
+          for (int i = 0; i < inputList.size(); ++i) {
+            const Input &in{ inputList[i] };
+            pinMode(in.port, in.hwConfig);
+            inputRead_[i] = digitalRead(inputList[i].port);
+            latestInputRead_[i] = inputRead_[i];
+            inputStatus_[i] = getInputActivation(inputRead_[i], in.mode);
+          }
 
-    // Initialize Input
-    const std::vector<Input> &inputList{ GEAR_INPUT_LIST[type_] };
-    for (int i = 0; i < inputList.size(); ++i) {
-      const Input &in{ inputList[i] };
-      pinMode(in.port, in.hwConfig);
-      inputRead_[i] = digitalRead(inputList[i].port);
-      latestInputRead_[i] = inputRead_[i];
-      inputStatus_[i] = getInputActivation(inputRead_[i], in.mode);
-    }
-
-    // Initialize Output
-    const std::vector<Output> &outputList{ GEAR_OUTPUT_LIST[type_] };
-    for (int i = 0; i < outputList.size(); ++i) {
-      const Output &out{ outputList[i] };
-      pinMode(out.port, OUTPUT);
-      outputStatus_[i] = false;
-      if (out.mode == OutputMode::ACTIVATE_HIGH) {
-        digitalWrite(out.port, LOW);
-      } else {
-        digitalWrite(out.port, HIGH);
-      }
+          // Initialize Output
+          const std::vector<Output> &outputList{ GEAR_OUTPUT_LIST[type_] };
+          for (int i = 0; i < outputList.size(); ++i) {
+            const Output &out{ outputList[i] };
+            pinMode(out.port, OUTPUT);
+            outputStatus_[i] = false;
+            if (out.mode == OutputMode::ACTIVATE_HIGH) {
+              digitalWrite(out.port, LOW);
+            } else {
+              digitalWrite(out.port, HIGH);
+            }
+          }
+          break;
+        }
     }
   }
 }
 
 void Gears::loop() {
   if (type_ > 0) {
-    const std::vector<Input> &inputList{ GEAR_INPUT_LIST[type_] };
-    const uint64_t currentTime = millis();
-    for (int i = 0; i < inputList.size(); ++i) {
-      const Input &in{ inputList[i] };
-      const int cur = digitalRead(inputList[i].port);
-      if (cur != latestInputRead_[i]) {
-        lastInputChangedTime_[i] = currentTime;
-        latestInputRead_[i] = cur;
-      }
-      if ((latestInputRead_[i] != inputRead_[i]) && ((currentTime - lastInputChangedTime_[i]) > 20)) {
-        inputRead_[i] = latestInputRead_[i];
-        inputStatus_[i] = getInputActivation(inputRead_[i], in.mode);
-        isDirty_ = true;
-        onButtonChanged(i);
+    switch (type_) {
+      case (GEAR_TYPE_DHT11):
+        {
+          break;
+        }
+      default:
+        {
+          const std::vector<Input> &inputList{ GEAR_INPUT_LIST[type_] };
+          const uint64_t currentTime = millis();
+          for (int i = 0; i < inputList.size(); ++i) {
+            const Input &in{ inputList[i] };
+            const int cur = digitalRead(inputList[i].port);
+            if (cur != latestInputRead_[i]) {
+              lastInputChangedTime_[i] = currentTime;
+              latestInputRead_[i] = cur;
+            }
+            if ((latestInputRead_[i] != inputRead_[i]) && ((currentTime - lastInputChangedTime_[i]) > 20)) {
+              inputRead_[i] = latestInputRead_[i];
+              inputStatus_[i] = getInputActivation(inputRead_[i], in.mode);
+              isDirty_ = true;
+              onButtonChanged(i);
 
-
-        Serial.print("input changed ");
-        Serial.println(inputStatus_[i]);
-      }
+              Serial.print("input changed ");
+              Serial.println(inputStatus_[i]);
+            }
+          }
+          break;
+        }
     }
   }
 }
@@ -262,20 +263,47 @@ void Gears::loop() {
 uint8_t *Gears::getStatusBuffer() {
   uint8_t by = 0U;
   if (type_ > 0) {
-    const std::vector<Input> &inputList{ GEAR_INPUT_LIST[type_] };
-    for (int i = 0; i < inputList.size(); ++i) {
-      by <<= 1;
-      if (inputStatus_[i]) by |= 0x01;
-    }
-    gearStatusPayloadBuffer_[0] = by;
+    switch (type_) {
+      case (GEAR_TYPE_DHT11):
+        {
+          float temp = dht->readTemperature(false);
+          float humidity = dht->readHumidity();
+          bool isGood = !(isnan(temp) || isnan(humidity));
+          uint8_t result = 0;
+          uint8_t tempU8 = 0;
+          uint8_t humdityU8 = 0;
+          if (isGood) {
+            result = 1;
+            tempU8 = static_cast<uint8_t> (temp);
+            humdityU8 = static_cast<uint8_t> (humidity);            
+          } else {
+            result = 0xFF;
+          }
+          gearStatusPayloadBuffer_[0] = result;
+          gearStatusPayloadBuffer_[1] = tempU8;
+          gearStatusPayloadBuffer_[2] = humdityU8;
+          
+          break;
+        }
+      default:
+        {
+          const std::vector<Input> &inputList{ GEAR_INPUT_LIST[type_] };
+          for (int i = 0; i < inputList.size(); ++i) {
+            by <<= 1;
+            if (inputStatus_[i]) by |= 0x01;
+          }
+          gearStatusPayloadBuffer_[0] = by;
 
-    by = 0U;
-    const std::vector<Output> &outputList{ GEAR_OUTPUT_LIST[type_] };
-    for (int i = 0; i < outputList.size(); ++i) {
-      by <<= 1;
-      if (outputStatus_[i]) by |= 0x01;
+          by = 0U;
+          const std::vector<Output> &outputList{ GEAR_OUTPUT_LIST[type_] };
+          for (int i = 0; i < outputList.size(); ++i) {
+            by <<= 1;
+            if (outputStatus_[i]) by |= 0x01;
+          }
+          gearStatusPayloadBuffer_[1] = by;
+          break;
+        }
     }
-    gearStatusPayloadBuffer_[1] = by;
   }
   isDirty_ = false;
   return gearStatusPayloadBuffer_;
@@ -283,11 +311,15 @@ uint8_t *Gears::getStatusBuffer() {
 
 void Gears::setOutputValue(uint8_t portIdx, uint8_t value) {
   if (type_ > 0) {
-    const std::vector<Output> &outputList{ GEAR_OUTPUT_LIST[type_] };
-    if (value < outputList.size()) {
-      const Output &output {outputList[portIdx]};
-      outputStatus_[portIdx] = !!(value);
-      digitalWrite(output.port, getOutputLevel(outputStatus_[portIdx], output.mode));
+    if (type_ < GEAR_OUTPUT_LIST.size()) {
+      const std::vector<Output> &outputList{ GEAR_OUTPUT_LIST[type_] };
+      if (value < outputList.size()) {
+        const Output &output{ outputList[portIdx] };
+        outputStatus_[portIdx] = !!(value);
+        digitalWrite(output.port, getOutputLevel(outputStatus_[portIdx], output.mode));
+      }
+    } else {
+      // not general IO
     }
   }
 }

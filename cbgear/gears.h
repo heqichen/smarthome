@@ -30,6 +30,7 @@ private:
 
   bool inputStatus_[MAX_HARDWARE_PORT_NUMBER];   // is activated
   bool outputStatus_[MAX_HARDWARE_PORT_NUMBER];  // is activated
+  
 
   uint64_t lastInputChangedTime_[MAX_HARDWARE_PORT_NUMBER];
 

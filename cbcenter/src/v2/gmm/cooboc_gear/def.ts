@@ -65,11 +65,14 @@ export enum CoobocGearTypeType {
     PIR = 8,
     WATER = 9,
     DOOR = 10,
+    DHT11 = 11,
+    DHT22 = 12,
+    LAST_ONE = 13,
     INVALID = 255
 };
 
 export const extractCoobocGearType = (uint8: number): CoobocGearTypeType => {
-    if (uint8 >= 0 && uint8 <= CoobocGearTypeType.DOOR) {
+    if (uint8 >= 0 && uint8 < CoobocGearTypeType.LAST_ONE) {
         return uint8 as CoobocGearTypeType;
     }
     return CoobocGearTypeType.INVALID;
