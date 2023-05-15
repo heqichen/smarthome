@@ -1,5 +1,5 @@
 import CoobocGearEncoder from "./cooboc_gear_encoder";
-import { CoobocGearSignatureType, PACKET_OFFSET_ID, PacketAttr, PacketType, millis } from "./def";
+import { CoobocGearSignatureType, CoobocGearTypeType, PACKET_OFFSET_ID, PACKET_OFFSET_PAYLOAD, PacketAttr, PacketType, millis } from "./def";
 import net from "net";
 import Config from "../../config";
 import CoobocGearDecoder, { CoobocGearPacketType, DecoderCallbackType } from "./cooboc_gear_decoder";
@@ -26,9 +26,12 @@ export default class CoobocGear {
         this._conn = conn;
         this._gearDisconnectedCallback = disconnectedCallback;
         this.onPacket = this.onPacket.bind(this);
+        this.checkHeartbeatEcho = this.checkHeartbeatEcho.bind(this);
         this.exterminate = this.exterminate.bind(this);
         this.isGood = this.isGood.bind(this);
         this.getId = this.getId.bind(this);
+
+
 
 
         this._heartbeatInterval = setInterval(() => {
@@ -88,6 +91,15 @@ export default class CoobocGear {
         }
         console.log(packet);
         console.log("ping: ", this._pingpongTime.toFixed(0), "ms");
+        if (this._signature.type === CoobocGearTypeType.DHT11) {
+            if (packet.payload.readUInt8(0) === 1) {
+                const temp: number = packet.payload.readUInt8(1);
+                const humidity: number = packet.payload.readUInt8(2);
+                console.log("temp: ", temp, "C,  humidity: ", humidity, "%");
+            } else {
+                console.log("DHT11 sensing FAILED");
+            }
+        }
 
     }
     readonly isGood = (): boolean => {

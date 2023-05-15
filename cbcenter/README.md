@@ -48,7 +48,7 @@ TODO:
 [ ] Can receive mask
 [#] html add dht11 ＆dht22
 [#] Can send out DHT11
-[ ] integration DHT11 into program
+[#] integration DHT11 into program
 [ ] For DHT11 interval read status and send out buffer directly by querying
 
 
