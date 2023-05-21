@@ -92,12 +92,13 @@ export default class CoobocGear {
         console.log(packet);
         console.log("ping: ", this._pingpongTime.toFixed(0), "ms");
         if (this._signature.type === CoobocGearTypeType.DHT11) {
-            if (packet.payload.readUInt8(0) === 1) {
-                const temp: number = packet.payload.readUInt8(1);
-                const humidity: number = packet.payload.readUInt8(2);
-                console.log("temp: ", temp, "C,  humidity: ", humidity, "%");
+            const errorCode: number = packet.payload.readUInt8(1);
+            if (errorCode === 0) {
+                const temp: number = -45.0 + 175.0 * (packet.payload.readUint16BE(2)) / 65535.0;
+                const humidity: number = -6.0 + 125.0 * packet.payload.readUint16BE(4) / 65535.0;
+                console.log("temp: ", temp.toFixed(2), "C,  humidity: ", humidity.toFixed(2), "%");
             } else {
-                console.log("DHT11 sensing FAILED");
+                console.log("SHT40 sensing FAILED", errorCode);
             }
         }
 

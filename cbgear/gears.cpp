@@ -1,13 +1,9 @@
 #include "gears.h"
-#include <DHT.h>
+#include "sht40.h"
 
-#define DHTTYPE DHT11
-#define DHTPIN  2
+static Sht40 sht40;
 
-static DHT *dht = nullptr;
-
-
-// ['None','0-Test','1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor'];
+// ['None','0-Test','1-Button','2-Button','3-Button','4-Button','Slot','Human Existence Sensor','PIR Sensor','Water Sensor','Door Sensor', 'SHT40'];
 
 enum class InputMode : uint8_t {
   PUSH_LOW,   // Default is high, push become low
@@ -189,10 +185,9 @@ void Gears::setup() {
 void Gears::setupDevicePin() {
   if (type_ > 0) {
     switch (type_) {
-      case (GEAR_TYPE_DHT11):
+      case (GEAR_TYPE_SHT40):
         {
-          dht = new DHT(DHTPIN, DHTTYPE, 11);
-          dht->begin();
+          sht40.setup();
           break;
         }
       default:
@@ -226,11 +221,14 @@ void Gears::setupDevicePin() {
   }
 }
 
+
+
 void Gears::loop() {
   if (type_ > 0) {
     switch (type_) {
-      case (GEAR_TYPE_DHT11):
+      case (GEAR_TYPE_SHT40):
         {
+          sht40.loop();
           break;
         }
       default:
@@ -264,25 +262,22 @@ uint8_t *Gears::getStatusBuffer() {
   uint8_t by = 0U;
   if (type_ > 0) {
     switch (type_) {
-      case (GEAR_TYPE_DHT11):
+      case (GEAR_TYPE_SHT40):
         {
-          float temp = dht->readTemperature(false);
-          float humidity = dht->readHumidity();
-          bool isGood = !(isnan(temp) || isnan(humidity));
-          uint8_t result = 0;
-          uint8_t tempU8 = 0;
-          uint8_t humdityU8 = 0;
-          if (isGood) {
-            result = 1;
-            tempU8 = static_cast<uint8_t> (temp);
-            humdityU8 = static_cast<uint8_t> (humidity);            
+          ShtData data = sht40.getData();
+          if (data.isGood) {
+            gearStatusPayloadBuffer_[0] = 0;
+            gearStatusPayloadBuffer_[1] = data.temp >> 8;
+            gearStatusPayloadBuffer_[2] = data.temp |= 0x00FF;
+            gearStatusPayloadBuffer_[3] = data.humidity >> 8;
+            gearStatusPayloadBuffer_[4] = data.humidity |= 0x00FF;
           } else {
-            result = 0xFF;
+            gearStatusPayloadBuffer_[0] = data.lastError;
+            gearStatusPayloadBuffer_[1] = 0;
+            gearStatusPayloadBuffer_[2] = 0;
+            gearStatusPayloadBuffer_[3] = 0;
+            gearStatusPayloadBuffer_[4] = 0;
           }
-          gearStatusPayloadBuffer_[0] = result;
-          gearStatusPayloadBuffer_[1] = tempU8;
-          gearStatusPayloadBuffer_[2] = humdityU8;
-          
           break;
         }
       default:

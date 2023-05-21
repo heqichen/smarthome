@@ -5,9 +5,9 @@
 #include <stdint.h>
 #include "gears.h"
 
-#define APPLICATION_VERSION 8U
+#define APPLICATION_VERSION 1U
 
-#define GEAR_TYPE_DHT11 11
+#define GEAR_TYPE_SHT40 11
 
 class Gears;
 

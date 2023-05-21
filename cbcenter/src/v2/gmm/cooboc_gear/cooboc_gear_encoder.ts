@@ -43,6 +43,7 @@ class CoobocGearEncoder_ {
 
     private readonly makePacketId = (): number => {
         this._packetIncId++;
+        this._packetIncId &= 0x00FFFF;
         return this._packetIncId;
     }
 

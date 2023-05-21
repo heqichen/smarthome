@@ -49,7 +49,14 @@ TODO:
 [#] html add dht11 ＆dht22
 [#] Can send out DHT11
 [#] integration DHT11 into program
-[ ] For DHT11 interval read status and send out buffer directly by querying
+[#] For DHT11 interval read status and send out buffer directly by querying
+[#] Soldering the SHT40
+[#] Wiring SHT40
+[#] A dummy programming for SHT40
+[ ] Integrating SHT40
+[ ] Bug gear will disconnect
+[ ] payload length mismatch gear with center
+[ ] Fix length of payload on gear to 8, match ceter         const uint8_t *payload = g_gears.getStatusBuffer();
 
 
 --- For Documentation

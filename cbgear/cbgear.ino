@@ -35,7 +35,6 @@ void loop() {
   if (g_gears.isDirty()) {
     Serial.println("gear dirty");
     const uint8_t *payload = g_gears.getStatusBuffer();
-
     if (g_mode == Mode::AP) {
       // TOOD
     } else {

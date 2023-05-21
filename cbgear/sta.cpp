@@ -15,6 +15,9 @@ static CsClient csClient;
 static PacketEncoder packetEncoder;
 
 static wl_status_t lastWifiStatus;
+
+String webString = "";
+
 void Sta::setup() {
   // start WiFI
   WiFi.mode(WIFI_STA);
@@ -34,6 +37,10 @@ void Sta::setup() {
     g_config.type = 0;
     writeEepromConfig();
     ESP.restart();
+  });
+
+  server.on("/test", HTTP_GET, []() {
+    server.send(200, "text/plain", webString);  // send to someones browser when asked
   });
   // handle cases when file is not found
   server.onNotFound([]() {
