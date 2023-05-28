@@ -37,7 +37,7 @@ export default class UI {
             resp.send({ "result": true });
         });
 
-        this._socketIo.on("connection", (socket) => {
+        this._socketIo.on("connection", (socket:any) => {
             console.log(" a socket io client come");
         })
 

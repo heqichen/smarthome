@@ -28,6 +28,12 @@ TODO:
 [ ] Can set mask on heartbeat
 [#] Move all process.env to config object
 [/] Refactor the v2
+[#] Can add to todo list depends on time
+[#] Can run todo list depends on todo list
+[#] refresh todo list when new day coming
+[#] run all todo list when day finished
+[#] add todo list when day finished
+
 
 -- For gear
 [X] Wite Socket config if config is not right

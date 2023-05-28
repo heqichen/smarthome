@@ -7,7 +7,7 @@
         "start": "npm run build && node build/v2/index.js",
         "start:dev": "npx nodemon",
         "build": "rimraf ./build && tsc",
-        "test": "rimraf ./build/test && tsc && node build/test/gear/index_test.js"
+        "test": "rimraf ./build/test && tsc && node build/test/automation/cosh/index_test.js"
     },
     "author": "",
     "license": "ISC",
@@ -22,6 +22,7 @@
     "dependencies": {
         "dotenv": "^16.0.3",
         "express": "^4.18.2",
+        "moment": "^2.29.4",
         "socket.io": "^4.6.1"
     }
 }
