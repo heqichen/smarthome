@@ -3,6 +3,7 @@ import "./index.css"
 
 import "./button.css"
 import GModeManager, { ModeEnum } from '../mode_manager';
+import SecurityCountDownPane from './count_down';
 
 type ButtonPropsType = {
     children?: any
@@ -47,7 +48,7 @@ class SecurityWindow extends React.Component<SecurityPropsType> {
     }
 
     private handleCountDown: () => React.ReactNode = (): React.ReactNode => {
-        return ("Count down");
+        return (<SecurityCountDownPane />);
     }
 
     readonly render: () => React.ReactNode = (): React.ReactNode => {
