@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
-import SecurityWindow from './security';
-import ModeManager, { ModeEnum, ModeManagerListenerType } from './mode_manager';
+import SecurityWindow, { SecurityPropsType, SecurityStateEnum } from './security';
+import GModeManager, { ModeEnum, ModeManagerListenerType } from './mode_manager';
 
 
 
@@ -26,29 +26,69 @@ import ModeManager, { ModeEnum, ModeManagerListenerType } from './mode_manager';
 //   );
 // }
 
+
+
 type AppPropsType = {
 
 };
 
-class App extends React.Component<AppPropsType> {
+type AppStateType = {
+  securityProps: SecurityPropsType
+}
+
+class App extends React.Component<AppPropsType, AppStateType> {
+  private _isSecurityWindow: boolean = true;
+  private _securityProps: SecurityPropsType = {
+    state: SecurityStateEnum.IDLE
+  }
+
   constructor(props: AppPropsType) {
     super(props);
     this.onModeChanged = this.onModeChanged.bind(this);
+    this.renderWindow = this.renderWindow.bind(this);
 
-    ModeManager.registerListener(this.onModeChanged);
+    GModeManager.registerListener(this.onModeChanged);
   }
   private readonly onModeChanged: ModeManagerListenerType = (mode: ModeEnum): void => {
     console.log("mode changed to ", mode);
+    switch (mode) {
+      case (ModeEnum.SECURITY_IDLE): {
+        this._isSecurityWindow = true;
+        this._securityProps = {
+          state: SecurityStateEnum.IDLE
+        }
+        break;
+      }
+      case (ModeEnum.SECURITY_AUTHENTICATING): {
+        this._isSecurityWindow = true;
+        this._securityProps = {
+          state: SecurityStateEnum.COUNT_DOWN
+        }
+        break;
+      }
+      default: {
+        console.error("ERROR, no mode detected");
+      }
+    }
+    this.setState({ securityProps: this._securityProps });
   }
 
   componentWillUnmount(): void {
     console.log("app unmount");
   }
 
+  private readonly renderWindow: () => React.ReactNode = (): React.ReactNode => {
+    if (this._isSecurityWindow) {
+      return <SecurityWindow {...this._securityProps} />
+    } else {
+      return (<div>ERROR</div>)
+    }
+  }
+
   render(): React.ReactNode {
     return (
       <div className="App">
-        <SecurityWindow />
+        {this.renderWindow()}
       </div>
     );
   }

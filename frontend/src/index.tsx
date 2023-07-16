@@ -19,6 +19,6 @@ root.render(
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
 
-setInterval(() => {
-  ModeManager.changeMode(ModeEnum.SECURITY);
-}, 2000);
+// setInterval(() => {
+//   ModeManager.changeMode(ModeEnum.SECURITY);
+// }, 2000);

@@ -1,13 +1,14 @@
 
 export enum ModeEnum {
-    SECURITY = 0,
+    SECURITY_IDLE = "SECURITY_IDLE",
+    SECURITY_AUTHENTICATING = "SECURITY_AUTHENTICATING"
 };
 export type ModeManagerListenerType = (mode: ModeEnum) => void;
 
-class _ModeManager {
+class ModeManager {
     private _id: number = 0;
     private readonly _listenerList: Map<number, ModeManagerListenerType> = new Map<number, ModeManagerListenerType>();
-    private _mode: ModeEnum = ModeEnum.SECURITY;
+    private _mode: ModeEnum = ModeEnum.SECURITY_IDLE;
 
     constructor() {
         this.registerListener = this.registerListener.bind(this);
@@ -24,6 +25,7 @@ class _ModeManager {
 
     readonly changeMode: (newMode: ModeEnum) => void = (newMode: ModeEnum): void => {
         this._mode = newMode;
+        console.log("request change mode to ", newMode);
         this._listenerList.forEach((listener: ModeManagerListenerType) => {
             listener(newMode);
         });
@@ -34,9 +36,7 @@ class _ModeManager {
         this._id++;
         return this._id;
     }
-
-
 };
 
-const ModeManager: _ModeManager = new _ModeManager();
-export default ModeManager;
+const GModeManager: ModeManager = new ModeManager();
+export default GModeManager;

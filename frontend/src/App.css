@@ -5,6 +5,7 @@
   height: 480px;
   overflow: hidden;
   background-color: gray;
+  user-select: none;
 }
 
 .App-logo {
